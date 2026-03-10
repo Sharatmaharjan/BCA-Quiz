@@ -300,14 +300,20 @@ const j=Math.floor(Math.random()*(i+1))
 return arr
 }
 
-function prepareShuffledQuestions(){
-questions=originalQuestions.map(q=>{
-const shuffledOptions=shuffleArray(q.options)
-const originalCorrect=q.options[q.answer]
-const newAnswerIndex=shuffledOptions.indexOf(originalCorrect)
-return{question:q.question,options:shuffledOptions,answer:newAnswerIndex}
-})
-selectedAnswers=new Array(questions.length).fill(null)
+function prepareShuffledQuestions() {
+    questions = originalQuestions.map(q => {
+        const shuffledOptions = shuffleArray(q.options);
+        const correctAnswer = q.options[q.answer];
+        const newAnswerIndex = shuffledOptions.indexOf(correctAnswer);
+
+        return {
+            question: q.question,
+            options: shuffledOptions,
+            answer: newAnswerIndex
+        };
+    });
+
+    selectedAnswers = new Array(questions.length).fill(null);
 }
 
 function renderQuestion(){
