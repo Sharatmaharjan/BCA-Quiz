@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzy Pro • Unit 4: Video and Animation (30 MCQs)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap');
+        
+        :root {
+            --primary: 249 115 22;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .title-font {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .option-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgb(249 115 22 / 0.3);
+        }
+        
+        .option-btn.selected-correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .option-btn.selected-wrong {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .option-btn.correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .progress-bar {
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal {
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .question-card {
+            animation: fadeSlide 0.4s ease forwards;
+        }
+        
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+    <div class="max-w-3xl mx-auto">
+        <!-- HEADER -->
+        <header class="bg-gradient-to-r from-rose-600 to-orange-600 text-white shadow-2xl">
+            <div class="px-6 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-x-4">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center text-4xl shadow-inner">
+                        🎥
+                    </div>
+                    <div>
+                        <h1 class="title-font text-3xl font-semibold tracking-tighter">Quizzy Pro</h1>
+                        <p class="text-orange-100 text-sm font-medium -mt-1">Unit 4: Video and Animation (30 MCQs)</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-x-3">
+                    <div onclick="restartQuiz()" 
+                         class="flex items-center gap-x-2 bg-white/20 hover:bg-white/30 transition-colors px-5 py-2.5 rounded-3xl text-sm font-semibold cursor-pointer">
+                        <i class="fas fa-redo"></i>
+                        <span>Restart</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PROGRESS -->
+            <div class="h-2 bg-black/30 relative">
+                <div id="progress-bar" 
+                     class="progress-bar h-2 bg-white rounded-r-full w-0"></div>
+            </div>
+        </header>
+
+        <!-- QUIZ CONTAINER -->
+        <div id="quiz-screen" class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-x-3">
+                    <div class="px-5 py-1.5 bg-zinc-900 rounded-3xl text-sm font-mono font-medium text-rose-400" id="question-counter">1 / 30</div>
+                </div>
+                <div onclick="showReviewModal()" 
+                     class="text-xs uppercase tracking-widest font-semibold text-zinc-400 hover:text-orange-300 cursor-pointer flex items-center gap-x-1">
+                    <i class="fas fa-list-check"></i>
+                    <span>Review All</span>
+                </div>
+            </div>
+
+            <!-- QUESTION -->
+            <div id="question-card" class="question-card bg-zinc-900 rounded-3xl p-8 shadow-2xl border border-zinc-800">
+                <p id="question-text" class="text-2xl leading-tight font-medium text-white"></p>
+                
+                <!-- OPTIONS -->
+                <div id="options-container" class="mt-10 space-y-4"></div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="flex gap-4 mt-10">
+                <button onclick="prevQuestion()" 
+                        id="btn-prev"
+                        class="flex-1 bg-zinc-900 hover:bg-zinc-800 transition-colors text-white font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3 shadow-inner">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Previous</span>
+                </button>
+                
+                <button onclick="nextQuestion()" 
+                        id="btn-next"
+                        class="flex-1 bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-400 hover:to-orange-400 transition-all font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3 shadow-lg shadow-rose-500/30">
+                    <span id="next-text">Next</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="results-screen" class="hidden p-6">
+            <div class="bg-zinc-900 rounded-3xl p-10 text-center">
+                <!-- Trophy -->
+                <div id="trophy" class="mx-auto w-32 h-32 flex items-center justify-center text-8xl mb-6"></div>
+                
+                <h2 class="text-6xl font-bold text-white mb-1" id="score">92</h2>
+                <p class="text-rose-400 text-2xl font-semibold">Score • <span id="percentage">92</span>%</p>
+                
+                <div class="grid grid-cols-3 gap-6 mt-12">
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-emerald-400">
+                            <i class="fas fa-check-circle text-3xl"></i>
+                        </div>
+                        <div id="correct-count" class="text-5xl font-bold mt-4 text-white">28</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">CORRECT</div>
+                    </div>
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-red-400">
+                            <i class="fas fa-times-circle text-3xl"></i>
+                        </div>
+                        <div id="incorrect-count" class="text-5xl font-bold mt-4 text-white">1</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">INCORRECT</div>
+                    </div>
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-amber-400">
+                            <i class="fas fa-forward text-3xl"></i>
+                        </div>
+                        <div id="skipped-count" class="text-5xl font-bold mt-4 text-white">1</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">SKIPPED</div>
+                    </div>
+                </div>
+
+                <!-- Insight -->
+                <div class="mt-10 bg-zinc-800/70 rounded-3xl p-8 text-left">
+                    <p id="insight-text" class="text-zinc-300 leading-relaxed text-lg"></p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-4 mt-12">
+                    <button onclick="showReviewModal()" 
+                            class="flex-1 py-6 bg-white text-zinc-900 rounded-3xl font-semibold flex items-center justify-center gap-x-3 hover:scale-105 transition-transform">
+                        <i class="fas fa-list-check"></i>
+                        REVIEW ALL ANSWERS
+                    </button>
+                    
+                    <button onclick="shareResults()" 
+                            class="flex-1 py-6 bg-zinc-800 hover:bg-zinc-700 rounded-3xl font-semibold flex items-center justify-center gap-x-3 transition-colors">
+                        <i class="fas fa-share-nodes"></i>
+                        SHARE RESULT
+                    </button>
+                </div>
+                
+                <button onclick="restartQuiz()" 
+                        class="mt-6 w-full py-5 text-rose-400 font-medium flex items-center justify-center gap-x-2 hover:text-rose-300">
+                    <i class="fas fa-rotate"></i>
+                    <span>Restart Quiz</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REVIEW MODAL -->
+    <div id="review-modal" onclick="if(event.target.id==='review-modal')hideReviewModal()" 
+         class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="modal bg-zinc-900 w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="px-8 py-6 border-b border-zinc-700 flex items-center justify-between">
+                <div class="font-semibold text-xl">Review All Answers</div>
+                <button onclick="hideReviewModal()" 
+                        class="w-9 h-9 flex items-center justify-center text-3xl leading-none text-zinc-400 hover:text-white">×</button>
+            </div>
+            
+            <!-- Content -->
+            <div id="review-list" class="flex-1 overflow-auto p-6 space-y-8">
+                <!-- JS injected -->
+            </div>
+            
+            <div class="p-6 border-t border-zinc-700">
+                <button onclick="hideReviewModal()" 
+                        class="w-full py-5 bg-rose-500 hover:bg-rose-400 transition-colors rounded-3xl text-white font-semibold">
+                    Close Review
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================== ORIGINAL QUESTIONS (30 exact from PDF) ======================
+        const originalQuestions = [
+            {
+                question: "What is the definition of Digital Video?",
+                options: [
+                    "A continuous analog signal",
+                    "An electronic representation of moving visual images (video) in the form of encoded digital data (a series of digital images/frames displayed in rapid succession)",
+                    "Only audio files with moving images",
+                    "Printed film strips"
+                ],
+                correctAnswer: "An electronic representation of moving visual images (video) in the form of encoded digital data (a series of digital images/frames displayed in rapid succession)"
+            },
+            {
+                question: "How does Digital Video differ from Analog Video?",
+                options: [
+                    "Digital video is continuous while analog is discrete",
+                    "Unlike analog video (continuous signal), digital video is discrete (binary data)",
+                    "Analog video can be copied without loss",
+                    "Digital video cannot be streamed"
+                ],
+                correctAnswer: "Unlike analog video (continuous signal), digital video is discrete (binary data)"
+            },
+            {
+                question: "Which key characteristic of Digital Video means it can be copied countless times with no degradation in quality?",
+                options: [
+                    "Large File Size",
+                    "No Generation Loss",
+                    "Requires Compression",
+                    "Compatibility Issues"
+                ],
+                correctAnswer: "No Generation Loss"
+            },
+            {
+                question: "Which is listed as a Real-World Example of Digital Video?",
+                options: [
+                    "A printed photograph",
+                    "A video recorded on a smartphone, uploaded to YouTube, and streamed on a smart TV",
+                    "An analog tape recording",
+                    "A vinyl record"
+                ],
+                correctAnswer: "A video recorded on a smartphone, uploaded to YouTube, and streamed on a smart TV"
+            },
+            {
+                question: "Which is an advantage of Digital Video?",
+                options: [
+                    "Large uncompressed file size",
+                    "High Quality: Immune to noise and signal degradation",
+                    "Compatibility issues on all devices",
+                    "Generation loss on copies"
+                ],
+                correctAnswer: "High Quality: Immune to noise and signal degradation"
+            },
+            {
+                question: "Which is an advantage of Digital Video related to editing?",
+                options: [
+                    "Only linear editing is possible",
+                    "Easy Editing: Can be edited using non-linear editing (NLE) software on computers",
+                    "Cannot be edited digitally",
+                    "Requires physical cutting of film"
+                ],
+                correctAnswer: "Easy Editing: Can be edited using non-linear editing (NLE) software on computers"
+            },
+            {
+                question: "Which is a disadvantage of Digital Video?",
+                options: [
+                    "Immune to noise",
+                    "Large File Size: Uncompressed video requires enormous storage and bandwidth",
+                    "No compression needed",
+                    "Perfect compatibility on all devices"
+                ],
+                correctAnswer: "Large File Size: Uncompressed video requires enormous storage and bandwidth"
+            },
+            {
+                question: "What is the concept of Interlaced Scanning in video signal representation?",
+                options: [
+                    "All lines of a frame are drawn in one pass",
+                    "Each frame is divided into two halves called fields (odd and even lines) displayed alternately",
+                    "Only progressive scanning",
+                    "No fields are used"
+                ],
+                correctAnswer: "Each frame is divided into two halves called fields (odd and even lines) displayed alternately"
+            },
+            {
+                question: "What is the Field Rate for a 30 fps interlaced video?",
+                options: [
+                    "30 fields per second",
+                    "60 fields per second",
+                    "24 fields per second",
+                    "120 fields per second"
+                ],
+                correctAnswer: "60 fields per second"
+            },
+            {
+                question: "Which is the Real-World Example given for Interlaced Scanning?",
+                options: [
+                    "Modern computer monitors and 1080p streaming",
+                    "Traditional CRT televisions and older broadcast TV standards (like 1080i)",
+                    "4K progressive video on Netflix",
+                    "VR headsets"
+                ],
+                correctAnswer: "Traditional CRT televisions and older broadcast TV standards (like 1080i)"
+            },
+            {
+                question: "What is an advantage of Interlaced Scanning?",
+                options: [
+                    "Smoother motion on fast objects",
+                    "Saves bandwidth compared to progressive scan, as only half the frame is transmitted at a time",
+                    "Sharper text",
+                    "More bandwidth required"
+                ],
+                correctAnswer: "Saves bandwidth compared to progressive scan, as only half the frame is transmitted at a time"
+            },
+            {
+                question: "What is a disadvantage of Interlaced Scanning?",
+                options: [
+                    "Requires less bandwidth",
+                    "Can cause 'combing' artifacts on fast-moving objects",
+                    "Always produces sharper images",
+                    "No artifacts on moving objects"
+                ],
+                correctAnswer: "Can cause 'combing' artifacts on fast-moving objects"
+            },
+            {
+                question: "What is the concept of Progressive Scanning?",
+                options: [
+                    "Frames are split into odd and even fields",
+                    "All lines of each frame are drawn sequentially in a single pass. The entire frame is displayed at once",
+                    "Used only in old CRT TVs",
+                    "Field rate is double the frame rate"
+                ],
+                correctAnswer: "All lines of each frame are drawn sequentially in a single pass. The entire frame is displayed at once"
+            },
+            {
+                question: "Which is the Real-World Example given for Progressive Scanning?",
+                options: [
+                    "Traditional CRT televisions and 1080i",
+                    "Computer monitors, modern HDTVs (like 1080p, 4K) and online streaming videos",
+                    "Analog VHS tapes",
+                    "Interlaced broadcast only"
+                ],
+                correctAnswer: "Computer monitors, modern HDTVs (like 1080p, 4K) and online streaming videos"
+            },
+            {
+                question: "What is an advantage of Progressive Scanning?",
+                options: [
+                    "Saves bandwidth",
+                    "Produces smoother motion and sharper images, especially for text and fast-moving scenes",
+                    "Causes combing artifacts",
+                    "Lower frame rate"
+                ],
+                correctAnswer: "Produces smoother motion and sharper images, especially for text and fast-moving scenes"
+            },
+            {
+                question: "Which bit rate type maintains a steady data rate throughout the video and is suitable for real-time streaming?",
+                options: [
+                    "VBR",
+                    "CBR (Constant Bit Rate)",
+                    "Progressive",
+                    "Interlaced"
+                ],
+                correctAnswer: "CBR (Constant Bit Rate)"
+            },
+            {
+                question: "Which bit rate type varies the data rate based on scene complexity and provides better quality-to-size ratio?",
+                options: [
+                    "CBR",
+                    "VBR (Variable Bit Rate)",
+                    "MPEG-2",
+                    "AVI"
+                ],
+                correctAnswer: "VBR (Variable Bit Rate)"
+            },
+            {
+                question: "Which video container is the most widely compatible and supports codecs like H.264 and H.265?",
+                options: [
+                    ".mov",
+                    ".mp4 (MPEG-4 Part 14)",
+                    ".avi",
+                    ".mkv only"
+                ],
+                correctAnswer: ".mp4 (MPEG-4 Part 14)"
+            },
+            {
+                question: "Which video container is Apple's format popular in professional video editing?",
+                options: [
+                    ".mp4",
+                    ".mov (QuickTime)",
+                    ".mkv",
+                    ".avi"
+                ],
+                correctAnswer: ".mov (QuickTime)"
+            },
+            {
+                question: "Which video codec is the most widely used for high-definition video with excellent compression and quality?",
+                options: [
+                    "H.265",
+                    "H.264 / AVC",
+                    "AV1",
+                    "MPEG-2"
+                ],
+                correctAnswer: "H.264 / AVC"
+            },
+            {
+                question: "Which video codec is the successor to H.264 and offers about 50% bitrate reduction for the same quality?",
+                options: [
+                    "H.264",
+                    "H.265 / HEVC",
+                    "MPEG-2",
+                    "AVI"
+                ],
+                correctAnswer: "H.265 / HEVC"
+            },
+            {
+                question: "Which modern open-source, royalty-free codec is designed for high-efficiency streaming over the internet?",
+                options: [
+                    "H.264",
+                    "AV1 (AOMedia Video 1)",
+                    "MPEG-2",
+                    "QuickTime"
+                ],
+                correctAnswer: "AV1 (AOMedia Video 1)"
+            },
+            {
+                question: "What is the definition of Computer-Based Animation?",
+                options: [
+                    "Only stop-motion with physical objects",
+                    "The process of creating moving images using computer graphics by generating a sequence of images (frames) that create the illusion of motion",
+                    "Only 2D hand-drawn",
+                    "Analog film animation"
+                ],
+                correctAnswer: "The process of creating moving images using computer graphics by generating a sequence of images (frames) that create the illusion of motion"
+            },
+            {
+                question: "Which type of Computer-Based Animation creates movement in a two-dimensional space?",
+                options: [
+                    "3D Animation",
+                    "2D Animation",
+                    "Motion Capture",
+                    "Stop Motion"
+                ],
+                correctAnswer: "2D Animation"
+            },
+            {
+                question: "Which is the Real-World Example given for 2D Animation?",
+                options: [
+                    "Pixar movies like Toy Story",
+                    "Classic cartoons (e.g., early Disney movies), explainer videos, and animated GIFs",
+                    "Avatar character movements",
+                    "Wallace and Gromit"
+                ],
+                correctAnswer: "Classic cartoons (e.g., early Disney movies), explainer videos, and animated GIFs"
+            },
+            {
+                question: "Which type of Computer-Based Animation creates objects with depth and realistic appearance?",
+                options: [
+                    "2D Animation",
+                    "3D Animation",
+                    "Stop Motion",
+                    "Frame-based only"
+                ],
+                correctAnswer: "3D Animation"
+            },
+            {
+                question: "Which is the Real-World Example given for 3D Animation?",
+                options: [
+                    "Animated GIFs",
+                    "Pixar movies (e.g., Toy Story), modern video game characters, architectural walkthroughs",
+                    "Traditional CRT TV",
+                    "Interlaced broadcast"
+                ],
+                correctAnswer: "Pixar movies (e.g., Toy Story), modern video game characters, architectural walkthroughs"
+            },
+            {
+                question: "Which type of animation records real human movements and applies them to a 3D digital character?",
+                options: [
+                    "2D Animation",
+                    "Motion Capture",
+                    "Tween-based",
+                    "Progressive scanning"
+                ],
+                correctAnswer: "Motion Capture"
+            },
+            {
+                question: "Which is the Real-World Example given for Motion Capture?",
+                options: [
+                    "Explainer videos",
+                    "Creating realistic character movements in blockbuster films like 'Avatar' or video games like 'The Last of Us'",
+                    "Adobe Animate GIFs",
+                    "Traditional cel animation"
+                ],
+                correctAnswer: "Creating realistic character movements in blockbuster films like 'Avatar' or video games like 'The Last of Us'"
+            },
+            {
+                question: "Which animation type physically manipulates real-world objects and captures them frame-by-frame?",
+                options: [
+                    "3D Animation",
+                    "Stop Motion Animation",
+                    "Motion Capture",
+                    "Tween-based only"
+                ],
+                correctAnswer: "Stop Motion Animation"
+            },
+            {
+                question: "Which is the Real-World Example given for Stop Motion Animation?",
+                options: [
+                    "Toy Story",
+                    "Movies like 'The Nightmare Before Christmas' or 'Wallace and Gromit'",
+                    "Netflix 4K streaming",
+                    "H.265 codec"
+                ],
+                correctAnswer: "Movies like 'The Nightmare Before Christmas' or 'Wallace and Gromit'"
+            }
+        ];
+
+        // ====================== QUIZ STATE ======================
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = [];
+        let isAnswered = [];
+
+        // Fisher-Yates shuffle
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function prepareShuffledQuestions() {
+            shuffledQuestions = originalQuestions.map(q => {
+                const shuffledOpts = shuffleArray(q.options);
+                const correctIndex = shuffledOpts.indexOf(q.correctAnswer);
+                return {
+                    question: q.question,
+                    options: shuffledOpts,
+                    correctIndex: correctIndex
+                };
+            });
+        }
+
+        // ====================== RENDER QUESTION ======================
+        function renderQuestion() {
+            const q = shuffledQuestions[currentIndex];
+            
+            document.getElementById("question-counter").textContent = `${currentIndex + 1} / 30`;
+            document.getElementById("question-text").textContent = q.question;
+            
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+            
+            const labels = ["A", "B", "C", "D"];
+            
+            q.options.forEach((option, idx) => {
+                const btn = document.createElement("button");
+                btn.className = `option-btn w-full text-left px-7 py-6 rounded-3xl border-2 border-zinc-700 bg-zinc-800 hover:border-rose-400 transition-all flex items-start gap-4 group`;
+                btn.innerHTML = `
+                    <span class="w-8 h-8 flex-shrink-0 rounded-2xl bg-zinc-700 text-rose-400 font-bold flex items-center justify-center text-lg transition-colors group-hover:bg-rose-400 group-hover:text-white">${labels[idx]}</span>
+                    <span class="text-lg leading-tight">${option}</span>
+                `;
+                
+                btn.onclick = () => selectOption(idx);
+                container.appendChild(btn);
+            });
+            
+            updateProgress();
+            updateNavigation();
+            
+            if (isAnswered[currentIndex]) {
+                showFeedback();
+            }
+        }
+
+        function selectOption(selectedIdx) {
+            if (isAnswered[currentIndex]) return;
+            
+            isAnswered[currentIndex] = true;
+            userAnswers[currentIndex] = selectedIdx;
+            
+            showFeedback();
+            updateNavigation();
+        }
+
+        function showFeedback() {
+            const q = shuffledQuestions[currentIndex];
+            const container = document.getElementById("options-container");
+            const buttons = container.children;
+            const userChoice = userAnswers[currentIndex];
+            
+            for (let i = 0; i < buttons.length; i++) {
+                const btn = buttons[i];
+                
+                if (i === q.correctIndex) {
+                    btn.classList.add("correct");
+                    btn.innerHTML += `<span class="ml-auto text-white text-2xl">✓</span>`;
+                }
+                
+                if (i === userChoice) {
+                    if (userChoice === q.correctIndex) {
+                        btn.classList.add("selected-correct");
+                    } else {
+                        btn.classList.add("selected-wrong");
+                        btn.innerHTML += `<span class="ml-auto text-white text-2xl">✕</span>`;
+                    }
+                }
+                
+                btn.onclick = null;
+                btn.style.cursor = "default";
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / 30) * 100;
+            document.getElementById("progress-bar").style.width = `${progress}%`;
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById("btn-prev");
+            const nextBtn = document.getElementById("btn-next");
+            const nextText = document.getElementById("next-text");
+            
+            prevBtn.disabled = currentIndex === 0;
+            prevBtn.style.opacity = currentIndex === 0 ? "0.4" : "1";
+            
+            if (currentIndex === 29) {
+                nextText.textContent = "Finish Quiz";
+            } else {
+                nextText.textContent = "Next";
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < 29) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        // ====================== RESULTS ======================
+        function calculateResults() {
+            let correct = 0;
+            let incorrect = 0;
+            let skipped = 0;
+            
+            for (let i = 0; i < 30; i++) {
+                if (!isAnswered[i]) {
+                    skipped++;
+                } else if (userAnswers[i] === shuffledQuestions[i].correctIndex) {
+                    correct++;
+                } else {
+                    incorrect++;
+                }
+            }
+            
+            const percentage = Math.round((correct / 30) * 100);
+            return { correct, incorrect, skipped, percentage };
+        }
+
+        function showResults() {
+            document.getElementById("quiz-screen").classList.add("hidden");
+            const resultsScreen = document.getElementById("results-screen");
+            resultsScreen.classList.remove("hidden");
+            
+            const stats = calculateResults();
+            
+            document.getElementById("score").textContent = stats.correct;
+            document.getElementById("percentage").textContent = stats.percentage;
+            document.getElementById("correct-count").textContent = stats.correct;
+            document.getElementById("incorrect-count").textContent = stats.incorrect;
+            document.getElementById("skipped-count").textContent = stats.skipped;
+            
+            const trophyEl = document.getElementById("trophy");
+            if (stats.percentage >= 80) {
+                trophyEl.innerHTML = "🏆";
+            } else if (stats.percentage >= 60) {
+                trophyEl.innerHTML = "🎉";
+            } else {
+                trophyEl.innerHTML = "🎥";
+            }
+            
+            let insight = "";
+            if (stats.percentage >= 90) {
+                insight = "Outstanding performance! You have completely mastered digital video formats, interlaced vs progressive scanning, codecs, animation types, and timeline/tween techniques.";
+            } else if (stats.percentage >= 75) {
+                insight = "Excellent work! Strong understanding of video signal representation, computer video formats, and modern animation workflows.";
+            } else if (stats.percentage >= 60) {
+                insight = "Good job! Solid grasp of the fundamentals. Review tween vs frame-based animation and transmission challenges.";
+            } else {
+                insight = "Keep learning! Focus on key differences between interlaced/progressive, container/codecs, and animation control methods.";
+            }
+            document.getElementById("insight-text").innerHTML = insight;
+        }
+
+        // ====================== REVIEW MODAL ======================
+        function showReviewModal() {
+            const modal = document.getElementById("review-modal");
+            const list = document.getElementById("review-list");
+            list.innerHTML = "";
+            
+            shuffledQuestions.forEach((q, i) => {
+                const answered = isAnswered[i];
+                const userIdx = userAnswers[i];
+                const isCorrect = answered && (userIdx === q.correctIndex);
+                
+                const div = document.createElement("div");
+                div.className = "border border-zinc-700 rounded-3xl p-6";
+                div.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-x-3">
+                                <span class="font-mono text-xs bg-zinc-800 px-3 py-1 rounded-2xl">${i+1}</span>
+                                <p class="font-medium text-white leading-tight">${q.question}</p>
+                            </div>
+                            
+                            <div class="mt-6 grid grid-cols-1 gap-4">
+                                ${q.options.map((opt, idx) => {
+                                    let statusHTML = "";
+                                    if (answered && idx === userIdx) {
+                                        statusHTML = isCorrect 
+                                            ? `<span class="text-emerald-400 text-xs font-bold">YOUR ANSWER ✓</span>` 
+                                            : `<span class="text-red-400 text-xs font-bold">YOUR ANSWER ✕</span>`;
+                                    }
+                                    if (idx === q.correctIndex) {
+                                        statusHTML += ` <span class="text-emerald-400 text-xs font-bold">CORRECT</span>`;
+                                    }
+                                    return `
+                                        <div class="flex justify-between items-center ${idx === q.correctIndex ? 'text-emerald-400' : 'text-zinc-300'}">
+                                            <span>${String.fromCharCode(65 + idx)}. ${opt}</span>
+                                            ${statusHTML}
+                                        </div>
+                                    `;
+                                }).join("")}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function hideReviewModal() {
+            const modal = document.getElementById("review-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        // ====================== SHARE ======================
+        function shareResults() {
+            const stats = calculateResults();
+            const text = `🎥 I just scored ${stats.percentage}% on Quizzy Pro • Unit 4: Video and Animation!\n\n✅ Correct: ${stats.correct}\n❌ Incorrect: ${stats.incorrect}\n⏭️ Skipped: ${stats.skipped}\n\nMastered digital video, codecs, animation types & tweening? Try Quizzy Pro!`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.currentTarget;
+                const origHTML = btn.innerHTML;
+                btn.innerHTML = `<i class="fas fa-check"></i> COPIED!`;
+                setTimeout(() => btn.innerHTML = origHTML, 2000);
+            });
+        }
+
+        // ====================== RESTART ======================
+        function restartQuiz() {
+            currentIndex = 0;
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            
+            prepareShuffledQuestions();
+            
+            document.getElementById("quiz-screen").classList.remove("hidden");
+            document.getElementById("results-screen").classList.add("hidden");
+            
+            renderQuestion();
+            
+            console.log("%cQuizzy Pro • Unit 4: Video and Animation restarted with fresh random order!", "color:#fb7185; font-weight:600");
+        }
+
+        // ====================== KEYBOARD SUPPORT ======================
+        function handleKeyboard(e) {
+            if (!document.getElementById("results-screen").classList.contains("hidden")) return;
+            
+            if (e.key === "ArrowRight") nextQuestion();
+            if (e.key === "ArrowLeft") prevQuestion();
+            if (e.key >= "1" && e.key <= "4" && !isAnswered[currentIndex]) {
+                selectOption(parseInt(e.key) - 1);
+            }
+        }
+
+        // ====================== START ======================
+        function startQuiz() {
+            prepareShuffledQuestions();
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            currentIndex = 0;
+            
+            renderQuestion();
+            document.addEventListener("keydown", handleKeyboard);
+            
+            console.log("%c✅ Quizzy Pro • Unit 4: Video and Animation loaded successfully! (30 MCQs from official PDF)", "color:#fb7185; font-family:monospace; font-size:13px");
+        }
+
+        window.onload = function() {
+            startQuiz();
+        };
+    </script>
+</body>
+</html>
