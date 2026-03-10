@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzy Pro • Unit 2: Sound/Audio System (30 MCQs)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap');
+        
+        :root {
+            --primary: 192 132 252;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .title-font {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .option-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgb(192 132 252 / 0.3);
+        }
+        
+        .option-btn.selected-correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .option-btn.selected-wrong {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .option-btn.correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .progress-bar {
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal {
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .question-card {
+            animation: fadeSlide 0.4s ease forwards;
+        }
+        
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+    <div class="max-w-3xl mx-auto">
+        <!-- HEADER -->
+        <header class="bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-2xl">
+            <div class="px-6 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-x-4">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center text-4xl shadow-inner">
+                        🎵
+                    </div>
+                    <div>
+                        <h1 class="title-font text-3xl font-semibold tracking-tighter">Quizzy Pro</h1>
+                        <p class="text-purple-100 text-sm font-medium -mt-1">Unit 2: Sound/Audio System (30 MCQs)</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-x-3">
+                    <div onclick="restartQuiz()" 
+                         class="flex items-center gap-x-2 bg-white/20 hover:bg-white/30 transition-colors px-5 py-2.5 rounded-3xl text-sm font-semibold cursor-pointer">
+                        <i class="fas fa-redo"></i>
+                        <span>Restart</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PROGRESS -->
+            <div class="h-2 bg-black/30 relative">
+                <div id="progress-bar" 
+                     class="progress-bar h-2 bg-white rounded-r-full w-0"></div>
+            </div>
+        </header>
+
+        <!-- QUIZ CONTAINER -->
+        <div id="quiz-screen" class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-x-3">
+                    <div class="px-5 py-1.5 bg-zinc-900 rounded-3xl text-sm font-mono font-medium text-purple-400" id="question-counter">1 / 30</div>
+                </div>
+                <div onclick="showReviewModal()" 
+                     class="text-xs uppercase tracking-widest font-semibold text-zinc-400 hover:text-purple-300 cursor-pointer flex items-center gap-x-1">
+                    <i class="fas fa-list-check"></i>
+                    <span>Review All</span>
+                </div>
+            </div>
+
+            <!-- QUESTION -->
+            <div id="question-card" class="question-card bg-zinc-900 rounded-3xl p-8 shadow-2xl border border-zinc-800">
+                <p id="question-text" class="text-2xl leading-tight font-medium text-white"></p>
+                
+                <!-- OPTIONS -->
+                <div id="options-container" class="mt-10 space-y-4"></div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="flex gap-4 mt-10">
+                <button onclick="prevQuestion()" 
+                        id="btn-prev"
+                        class="flex-1 bg-zinc-900 hover:bg-zinc-800 transition-colors text-white font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3 shadow-inner">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Previous</span>
+                </button>
+                
+                <button onclick="nextQuestion()" 
+                        id="btn-next"
+                        class="flex-1 bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-400 hover:to-violet-400 transition-all font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3 shadow-lg shadow-purple-500/30">
+                    <span id="next-text">Next</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="results-screen" class="hidden p-6">
+            <div class="bg-zinc-900 rounded-3xl p-10 text-center">
+                <!-- Trophy -->
+                <div id="trophy" class="mx-auto w-32 h-32 flex items-center justify-center text-8xl mb-6"></div>
+                
+                <h2 class="text-6xl font-bold text-white mb-1" id="score">92</h2>
+                <p class="text-purple-400 text-2xl font-semibold">Score • <span id="percentage">92</span>%</p>
+                
+                <div class="grid grid-cols-3 gap-6 mt-12">
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-emerald-400">
+                            <i class="fas fa-check-circle text-3xl"></i>
+                        </div>
+                        <div id="correct-count" class="text-5xl font-bold mt-4 text-white">28</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">CORRECT</div>
+                    </div>
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-red-400">
+                            <i class="fas fa-times-circle text-3xl"></i>
+                        </div>
+                        <div id="incorrect-count" class="text-5xl font-bold mt-4 text-white">1</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">INCORRECT</div>
+                    </div>
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-amber-400">
+                            <i class="fas fa-forward text-3xl"></i>
+                        </div>
+                        <div id="skipped-count" class="text-5xl font-bold mt-4 text-white">1</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">SKIPPED</div>
+                    </div>
+                </div>
+
+                <!-- Insight -->
+                <div class="mt-10 bg-zinc-800/70 rounded-3xl p-8 text-left">
+                    <p id="insight-text" class="text-zinc-300 leading-relaxed text-lg"></p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-4 mt-12">
+                    <button onclick="showReviewModal()" 
+                            class="flex-1 py-6 bg-white text-zinc-900 rounded-3xl font-semibold flex items-center justify-center gap-x-3 hover:scale-105 transition-transform">
+                        <i class="fas fa-list-check"></i>
+                        REVIEW ALL ANSWERS
+                    </button>
+                    
+                    <button onclick="shareResults()" 
+                            class="flex-1 py-6 bg-zinc-800 hover:bg-zinc-700 rounded-3xl font-semibold flex items-center justify-center gap-x-3 transition-colors">
+                        <i class="fas fa-share-nodes"></i>
+                        SHARE RESULT
+                    </button>
+                </div>
+                
+                <button onclick="restartQuiz()" 
+                        class="mt-6 w-full py-5 text-purple-400 font-medium flex items-center justify-center gap-x-2 hover:text-purple-300">
+                    <i class="fas fa-rotate"></i>
+                    <span>Restart Quiz</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REVIEW MODAL -->
+    <div id="review-modal" onclick="if(event.target.id==='review-modal')hideReviewModal()" 
+         class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="modal bg-zinc-900 w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="px-8 py-6 border-b border-zinc-700 flex items-center justify-between">
+                <div class="font-semibold text-xl">Review All Answers</div>
+                <button onclick="hideReviewModal()" 
+                        class="w-9 h-9 flex items-center justify-center text-3xl leading-none text-zinc-400 hover:text-white">×</button>
+            </div>
+            
+            <!-- Content -->
+            <div id="review-list" class="flex-1 overflow-auto p-6 space-y-8">
+                <!-- JS injected -->
+            </div>
+            
+            <div class="p-6 border-t border-zinc-700">
+                <button onclick="hideReviewModal()" 
+                        class="w-full py-5 bg-purple-500 hover:bg-purple-400 transition-colors rounded-3xl text-white font-semibold">
+                    Close Review
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================== ORIGINAL QUESTIONS (30 exact from PDF) ======================
+        const originalQuestions = [
+            {
+                question: "What is the definition of an audio system?",
+                options: [
+                    "A device that only plays pre-recorded music",
+                    "A combination of electronic devices and software designed to capture, process, store, transmit, and reproduce sound",
+                    "Only loudspeakers and headphones connected to a computer",
+                    "Software used exclusively for video editing"
+                ],
+                correctAnswer: "A combination of electronic devices and software designed to capture, process, store, transmit, and reproduce sound"
+            },
+            {
+                question: "Which devices are listed as Input/Source Devices in an audio system?",
+                options: [
+                    "Mixing consoles and DSPs",
+                    "Microphones, musical instruments (electric guitar), CD/DVD players, streaming services (Spotify)",
+                    "Power amplifiers and loudspeakers",
+                    "DAW software only"
+                ],
+                correctAnswer: "Microphones, musical instruments (electric guitar), CD/DVD players, streaming services (Spotify)"
+            },
+            {
+                question: "Which devices are listed as Processing Devices in an audio system?",
+                options: [
+                    "Microphones and CD players",
+                    "Mixing consoles, digital signal processors (DSPs), audio interfaces, computer with DAW software",
+                    "Loudspeakers and headphones",
+                    "Power amplifiers only"
+                ],
+                correctAnswer: "Mixing consoles, digital signal processors (DSPs), audio interfaces, computer with DAW software"
+            },
+            {
+                question: "What is the role of Amplification in an audio system?",
+                options: [
+                    "To capture sound from microphones",
+                    "Power amplifiers that boost the weak audio signal to a level strong enough to drive speakers",
+                    "To convert electrical signals back into sound waves",
+                    "To store digital audio files"
+                ],
+                correctAnswer: "Power amplifiers that boost the weak audio signal to a level strong enough to drive speakers"
+            },
+            {
+                question: "Which devices are listed as Output/Transduction Devices?",
+                options: [
+                    "Microphones and musical instruments",
+                    "Loudspeakers, headphones, earphones",
+                    "Mixing consoles and audio interfaces",
+                    "Streaming services like Spotify"
+                ],
+                correctAnswer: "Loudspeakers, headphones, earphones"
+            },
+            {
+                question: "What is the core function of an audio system?",
+                options: [
+                    "Only to play music from streaming services",
+                    "To faithfully capture sound, manipulate it as desired, and reproduce it with clarity and power",
+                    "To convert video files into audio",
+                    "To compress audio files only"
+                ],
+                correctAnswer: "To faithfully capture sound, manipulate it as desired, and reproduce it with clarity and power"
+            },
+            {
+                question: "Which is the exact Real-World Example given for an audio system?",
+                options: [
+                    "A smartphone used only for texting",
+                    "A home theater system: Blu-ray player (source), AV receiver (processor/amplifier), and speaker setup (output)",
+                    "A printer connected to a computer",
+                    "A digital camera recording video only"
+                ],
+                correctAnswer: "A home theater system: Blu-ray player (source), AV receiver (processor/amplifier), and speaker setup (output)"
+            },
+            {
+                question: "Producing Digital Audio is the process of converting:",
+                options: [
+                    "Digital signals into analog sound waves",
+                    "Analog sound waves (continuous) into a digital format (discrete numbers) that computers can store and manipulate",
+                    "MIDI messages into MP3 files",
+                    "Text into speech only"
+                ],
+                correctAnswer: "Analog sound waves (continuous) into a digital format (discrete numbers) that computers can store and manipulate"
+            },
+            {
+                question: "What is the first step in Analog to Digital Conversion (ADC)?",
+                options: [
+                    "Encoding the values as binary data",
+                    "Sampling: Measuring the amplitude of the analog signal at regular intervals",
+                    "Quantization of amplitude levels",
+                    "Playback through DAC"
+                ],
+                correctAnswer: "Sampling: Measuring the amplitude of the analog signal at regular intervals"
+            },
+            {
+                question: "What is Sampling Rate in digital audio?",
+                options: [
+                    "The number of bits used per sample",
+                    "The number of samples taken per second, measured in Hertz (Hz)",
+                    "The volume level of the audio",
+                    "The compression ratio of the file"
+                ],
+                correctAnswer: "The number of samples taken per second, measured in Hertz (Hz)"
+            },
+            {
+                question: "What is the sampling rate used for CD-quality audio?",
+                options: [
+                    "22.05 kHz",
+                    "44.1 kHz (44,100 samples per second)",
+                    "96 kHz",
+                    "192 kHz"
+                ],
+                correctAnswer: "44.1 kHz (44,100 samples per second)"
+            },
+            {
+                question: "What is the second step in ADC called?",
+                options: [
+                    "Sampling",
+                    "Quantization: Assigning a discrete value to each sampled amplitude from a fixed set of levels",
+                    "Encoding",
+                    "Transmission"
+                ],
+                correctAnswer: "Quantization: Assigning a discrete value to each sampled amplitude from a fixed set of levels"
+            },
+            {
+                question: "What is Bit Depth in digital audio?",
+                options: [
+                    "The number of samples taken per second",
+                    "The number of bits used to represent each sample (determines dynamic range and accuracy)",
+                    "The file size in megabytes",
+                    "The playback speed"
+                ],
+                correctAnswer: "The number of bits used to represent each sample (determines dynamic range and accuracy)"
+            },
+            {
+                question: "What bit depth is used for CD-quality audio?",
+                options: [
+                    "8 bits",
+                    "16 bits, providing 65,536 possible amplitude levels",
+                    "24 bits",
+                    "32 bits"
+                ],
+                correctAnswer: "16 bits, providing 65,536 possible amplitude levels"
+            },
+            {
+                question: "What is the third step in the digital audio production process?",
+                options: [
+                    "Quantization",
+                    "Encoding: Representing the quantized values as binary data (0s and 1s) and storing them in a digital file",
+                    "Sampling",
+                    "Amplification"
+                ],
+                correctAnswer: "Encoding: Representing the quantized values as binary data (0s and 1s) and storing them in a digital file"
+            },
+            {
+                question: "What is Playback (DAC) in digital audio?",
+                options: [
+                    "The process of capturing analog sound",
+                    "The reverse process where a Digital-to-Analog Converter reads the binary data and reconstructs a continuous analog voltage",
+                    "Compressing the audio file",
+                    "Transmitting the signal over radio waves"
+                ],
+                correctAnswer: "The reverse process where a Digital-to-Analog Converter reads the binary data and reconstructs a continuous analog voltage"
+            },
+            {
+                question: "Which is the exact Real-World Example given for producing digital audio?",
+                options: [
+                    "Watching a movie in a theater",
+                    "Recording a podcast: Your voice (analog) hits the microphone, is converted to an electrical signal, and your audio interface performs ADC",
+                    "Playing a MIDI file",
+                    "Streaming video on YouTube"
+                ],
+                correctAnswer: "Recording a podcast: Your voice (analog) hits the microphone, is converted to an electrical signal, and your audio interface performs ADC"
+            },
+            {
+                question: "According to the comparison table, what is the Primary Goal of Music?",
+                options: [
+                    "Convey propositional meaning and information",
+                    "Aesthetic, emotional, and artistic expression",
+                    "To deliver news updates",
+                    "To provide semantic content only"
+                ],
+                correctAnswer: "Aesthetic, emotional, and artistic expression"
+            },
+            {
+                question: "According to the comparison table, what is the Acoustic Structure of Music?",
+                options: [
+                    "Continuous pitch contours (intonation) and irregular rhythms",
+                    "Often based on discrete pitches (scales) and a regular, periodic pulse (isochronic beat)",
+                    "Faster amplitude changes",
+                    "High semantic load"
+                ],
+                correctAnswer: "Often based on discrete pitches (scales) and a regular, periodic pulse (isochronic beat)"
+            },
+            {
+                question: "According to the comparison table, what describes Amplitude Modulation in Music?",
+                options: [
+                    "Faster and more irregular amplitude changes (approx. 4-5 Hz)",
+                    "Relatively slow and steady amplitude changes (approx. 1-2 Hz)",
+                    "No amplitude changes",
+                    "High semantic load"
+                ],
+                correctAnswer: "Relatively slow and steady amplitude changes (approx. 1-2 Hz)"
+            },
+            {
+                question: "According to the comparison table, what is the Semantic Load of Speech?",
+                options: [
+                    "Low. Instrumental music has no semantic meaning",
+                    "High. Every word and sentence structure carries semantic content",
+                    "Only lyrics add meaning",
+                    "Dependent on the instrument"
+                ],
+                correctAnswer: "High. Every word and sentence structure carries semantic content"
+            },
+            {
+                question: "Which is the exact Real-World Example given for Music vs Speech?",
+                options: [
+                    "A podcast recording",
+                    "Compare a pop song (steady beat, repeating chorus) to a news broadcast (irregular rhythm, information-dense sentences)",
+                    "Using Siri for reminders",
+                    "A MIDI file playing on a synthesizer"
+                ],
+                correctAnswer: "Compare a pop song (steady beat, repeating chorus) to a news broadcast (irregular rhythm, information-dense sentences)"
+            },
+            {
+                question: "What is Speech Generation also known as?",
+                options: [
+                    "Automatic Speech Recognition (ASR)",
+                    "Speech Synthesis or Text-to-Speech (TTS)",
+                    "MIDI sequencing",
+                    "Audio compression"
+                ],
+                correctAnswer: "Speech Synthesis or Text-to-Speech (TTS)"
+            },
+            {
+                question: "What is the first key step in modern Text-to-Speech (TTS)?",
+                options: [
+                    "Waveform Generation",
+                    "Text Analysis: The system analyzes input text to understand structure (sentences, numbers, abbreviations)",
+                    "Prosody Generation",
+                    "Compression"
+                ],
+                correctAnswer: "Text Analysis: The system analyzes input text to understand structure (sentences, numbers, abbreviations)"
+            },
+            {
+                question: "What is the second key step in modern TTS?",
+                options: [
+                    "Text Analysis",
+                    "Prosody Generation: Determines the intonation, rhythm, and stress patterns to make the speech sound natural",
+                    "Encoding",
+                    "Packetization"
+                ],
+                correctAnswer: "Prosody Generation: Determines the intonation, rhythm, and stress patterns to make the speech sound natural"
+            },
+            {
+                question: "What is the third key step in modern TTS?",
+                options: [
+                    "Prosody Generation",
+                    "Waveform Generation: Produces the actual audio waveform from the linguistic and prosodic information",
+                    "Sampling",
+                    "Transmission"
+                ],
+                correctAnswer: "Waveform Generation: Produces the actual audio waveform from the linguistic and prosodic information"
+            },
+            {
+                question: "What is the Older Method of Speech Generation?",
+                options: [
+                    "Parametric/Neural using deep learning",
+                    "Concatenative: Stitches together pre-recorded snippets of a human voice",
+                    "MIDI messaging",
+                    "Lossless compression"
+                ],
+                correctAnswer: "Concatenative: Stitches together pre-recorded snippets of a human voice"
+            },
+            {
+                question: "What is the Modern Method of Speech Generation?",
+                options: [
+                    "Concatenative synthesis",
+                    "Parametric/Neural: Uses deep learning models (like the Sesame model) trained on massive datasets",
+                    "Analog recording",
+                    "MIDI protocol"
+                ],
+                correctAnswer: "Parametric/Neural: Uses deep learning models (like the Sesame model) trained on massive datasets"
+            },
+            {
+                question: "Which is the exact Real-World Example given for Speech Generation?",
+                options: [
+                    "Recording a podcast in Audacity",
+                    "Virtual assistants like Siri, Alexa, and Google Assistant using TTS",
+                    "Playing a .mid file",
+                    "Streaming MP3 on Spotify"
+                ],
+                correctAnswer: "Virtual assistants like Siri, Alexa, and Google Assistant using TTS"
+            },
+            {
+                question: "What is Speech Analysis?",
+                options: [
+                    "The process of producing artificial speech",
+                    "The process of extracting meaningful information and features from a speech signal",
+                    "Compressing audio files",
+                    "Transmitting MIDI messages"
+                ],
+                correctAnswer: "The process of extracting meaningful information and features from a speech signal"
+            },
+            {
+                question: "Which of the following is part of Feature Extraction in Speech Analysis?",
+                options: [
+                    "Packetization and error handling",
+                    "Pitch (Fundamental Frequency - F0), Formants, Energy/Amplitude",
+                    "MIDI channels and messages",
+                    "Lossy compression using MP3"
+                ],
+                correctAnswer: "Pitch (Fundamental Frequency - F0), Formants, Energy/Amplitude"
+            }
+        ];
+
+        // ====================== QUIZ STATE ======================
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = [];
+        let isAnswered = [];
+
+        // Fisher-Yates shuffle
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function prepareShuffledQuestions() {
+            shuffledQuestions = originalQuestions.map(q => {
+                const shuffledOpts = shuffleArray(q.options);
+                const correctIndex = shuffledOpts.indexOf(q.correctAnswer);
+                return {
+                    question: q.question,
+                    options: shuffledOpts,
+                    correctIndex: correctIndex
+                };
+            });
+        }
+
+        // ====================== RENDER QUESTION ======================
+        function renderQuestion() {
+            const q = shuffledQuestions[currentIndex];
+            
+            document.getElementById("question-counter").textContent = `${currentIndex + 1} / 30`;
+            document.getElementById("question-text").textContent = q.question;
+            
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+            
+            const labels = ["A", "B", "C", "D"];
+            
+            q.options.forEach((option, idx) => {
+                const btn = document.createElement("button");
+                btn.className = `option-btn w-full text-left px-7 py-6 rounded-3xl border-2 border-zinc-700 bg-zinc-800 hover:border-purple-400 transition-all flex items-start gap-4 group`;
+                btn.innerHTML = `
+                    <span class="w-8 h-8 flex-shrink-0 rounded-2xl bg-zinc-700 text-purple-400 font-bold flex items-center justify-center text-lg transition-colors group-hover:bg-purple-400 group-hover:text-white">${labels[idx]}</span>
+                    <span class="text-lg leading-tight">${option}</span>
+                `;
+                
+                btn.onclick = () => selectOption(idx);
+                container.appendChild(btn);
+            });
+            
+            updateProgress();
+            updateNavigation();
+            
+            if (isAnswered[currentIndex]) {
+                showFeedback();
+            }
+        }
+
+        function selectOption(selectedIdx) {
+            if (isAnswered[currentIndex]) return;
+            
+            isAnswered[currentIndex] = true;
+            userAnswers[currentIndex] = selectedIdx;
+            
+            showFeedback();
+            updateNavigation();
+        }
+
+        function showFeedback() {
+            const q = shuffledQuestions[currentIndex];
+            const container = document.getElementById("options-container");
+            const buttons = container.children;
+            const userChoice = userAnswers[currentIndex];
+            
+            for (let i = 0; i < buttons.length; i++) {
+                const btn = buttons[i];
+                
+                if (i === q.correctIndex) {
+                    btn.classList.add("correct");
+                    btn.innerHTML += `<span class="ml-auto text-white text-2xl">✓</span>`;
+                }
+                
+                if (i === userChoice) {
+                    if (userChoice === q.correctIndex) {
+                        btn.classList.add("selected-correct");
+                    } else {
+                        btn.classList.add("selected-wrong");
+                        btn.innerHTML += `<span class="ml-auto text-white text-2xl">✕</span>`;
+                    }
+                }
+                
+                btn.onclick = null;
+                btn.style.cursor = "default";
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / 30) * 100;
+            document.getElementById("progress-bar").style.width = `${progress}%`;
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById("btn-prev");
+            const nextBtn = document.getElementById("btn-next");
+            const nextText = document.getElementById("next-text");
+            
+            prevBtn.disabled = currentIndex === 0;
+            prevBtn.style.opacity = currentIndex === 0 ? "0.4" : "1";
+            
+            if (currentIndex === 29) {
+                nextText.textContent = "Finish Quiz";
+            } else {
+                nextText.textContent = "Next";
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < 29) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        // ====================== RESULTS ======================
+        function calculateResults() {
+            let correct = 0;
+            let incorrect = 0;
+            let skipped = 0;
+            
+            for (let i = 0; i < 30; i++) {
+                if (!isAnswered[i]) {
+                    skipped++;
+                } else if (userAnswers[i] === shuffledQuestions[i].correctIndex) {
+                    correct++;
+                } else {
+                    incorrect++;
+                }
+            }
+            
+            const percentage = Math.round((correct / 30) * 100);
+            return { correct, incorrect, skipped, percentage };
+        }
+
+        function showResults() {
+            document.getElementById("quiz-screen").classList.add("hidden");
+            const resultsScreen = document.getElementById("results-screen");
+            resultsScreen.classList.remove("hidden");
+            
+            const stats = calculateResults();
+            
+            document.getElementById("score").textContent = stats.correct;
+            document.getElementById("percentage").textContent = stats.percentage;
+            document.getElementById("correct-count").textContent = stats.correct;
+            document.getElementById("incorrect-count").textContent = stats.incorrect;
+            document.getElementById("skipped-count").textContent = stats.skipped;
+            
+            const trophyEl = document.getElementById("trophy");
+            if (stats.percentage >= 80) {
+                trophyEl.innerHTML = "🏆";
+            } else if (stats.percentage >= 60) {
+                trophyEl.innerHTML = "🎉";
+            } else {
+                trophyEl.innerHTML = "🎤";
+            }
+            
+            let insight = "";
+            if (stats.percentage >= 90) {
+                insight = "Outstanding performance! You have completely mastered digital audio production, speech systems, and the critical MIDI vs Digital Audio comparison.";
+            } else if (stats.percentage >= 75) {
+                insight = "Excellent work! Strong understanding of audio system components, sampling, and modern TTS technology.";
+            } else if (stats.percentage >= 60) {
+                insight = "Good job! Solid grasp of the fundamentals. Review MIDI messages and audio file formats for perfection.";
+            } else {
+                insight = "Keep practicing! Focus on ADC process, speech analysis, and the huge differences between MIDI and digital audio.";
+            }
+            document.getElementById("insight-text").innerHTML = insight;
+        }
+
+        // ====================== REVIEW MODAL ======================
+        function showReviewModal() {
+            const modal = document.getElementById("review-modal");
+            const list = document.getElementById("review-list");
+            list.innerHTML = "";
+            
+            shuffledQuestions.forEach((q, i) => {
+                const answered = isAnswered[i];
+                const userIdx = userAnswers[i];
+                const isCorrect = answered && (userIdx === q.correctIndex);
+                
+                const div = document.createElement("div");
+                div.className = "border border-zinc-700 rounded-3xl p-6";
+                div.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-x-3">
+                                <span class="font-mono text-xs bg-zinc-800 px-3 py-1 rounded-2xl">${i+1}</span>
+                                <p class="font-medium text-white leading-tight">${q.question}</p>
+                            </div>
+                            
+                            <div class="mt-6 grid grid-cols-1 gap-4">
+                                ${q.options.map((opt, idx) => {
+                                    let statusHTML = "";
+                                    if (answered && idx === userIdx) {
+                                        statusHTML = isCorrect 
+                                            ? `<span class="text-emerald-400 text-xs font-bold">YOUR ANSWER ✓</span>` 
+                                            : `<span class="text-red-400 text-xs font-bold">YOUR ANSWER ✕</span>`;
+                                    }
+                                    if (idx === q.correctIndex) {
+                                        statusHTML += ` <span class="text-emerald-400 text-xs font-bold">CORRECT</span>`;
+                                    }
+                                    return `
+                                        <div class="flex justify-between items-center ${idx === q.correctIndex ? 'text-emerald-400' : 'text-zinc-300'}">
+                                            <span>${String.fromCharCode(65 + idx)}. ${opt}</span>
+                                            ${statusHTML}
+                                        </div>
+                                    `;
+                                }).join("")}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function hideReviewModal() {
+            const modal = document.getElementById("review-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        // ====================== SHARE ======================
+        function shareResults() {
+            const stats = calculateResults();
+            const text = `🎵 I just scored ${stats.percentage}% on Quizzy Pro • Unit 2: Sound/Audio System!\n\n✅ Correct: ${stats.correct}\n❌ Incorrect: ${stats.incorrect}\n⏭️ Skipped: ${stats.skipped}\n\nMastered digital audio, MIDI & speech systems? Try Quizzy Pro!`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.currentTarget;
+                const origHTML = btn.innerHTML;
+                btn.innerHTML = `<i class="fas fa-check"></i> COPIED!`;
+                setTimeout(() => btn.innerHTML = origHTML, 2000);
+            });
+        }
+
+        // ====================== RESTART ======================
+        function restartQuiz() {
+            currentIndex = 0;
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            
+            prepareShuffledQuestions();
+            
+            document.getElementById("quiz-screen").classList.remove("hidden");
+            document.getElementById("results-screen").classList.add("hidden");
+            
+            renderQuestion();
+            
+            console.log("%cQuizzy Pro • Unit 2: Sound/Audio System restarted with fresh random order!", "color:#c084fc; font-weight:600");
+        }
+
+        // ====================== KEYBOARD SUPPORT ======================
+        function handleKeyboard(e) {
+            if (!document.getElementById("results-screen").classList.contains("hidden")) return;
+            
+            if (e.key === "ArrowRight") nextQuestion();
+            if (e.key === "ArrowLeft") prevQuestion();
+            if (e.key >= "1" && e.key <= "4" && !isAnswered[currentIndex]) {
+                selectOption(parseInt(e.key) - 1);
+            }
+        }
+
+        // ====================== START ======================
+        function startQuiz() {
+            prepareShuffledQuestions();
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            currentIndex = 0;
+            
+            renderQuestion();
+            document.addEventListener("keydown", handleKeyboard);
+            
+            console.log("%c✅ Quizzy Pro • Unit 2: Sound/Audio System loaded successfully! (30 MCQs from official PDF)", "color:#c084fc; font-family:monospace; font-size:13px");
+        }
+
+        window.onload = function() {
+            startQuiz();
+        };
+    </script>
+</body>
+</html>
