@@ -1,1 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzy Pro • Unit 1: Introduction (30 MCQs)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap');
+        
+        :root {
+            --primary: 165 243 252;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .title-font {
+            font-family: 'Poppins', sans-serif;
+        }
 
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .option-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgb(165 243 252 / 0.3);
+        }
+        
+        .option-btn.selected-correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .option-btn.selected-wrong {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .option-btn.correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .progress-bar {
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal {
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .question-card {
+            animation: fadeSlide 0.4s ease forwards;
+        }
+        
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+    <div class="max-w-3xl mx-auto">
+        <!-- HEADER -->
+        <header class="bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-2xl">
+            <div class="px-6 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-x-4">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center text-4xl shadow-inner">
+                        🎬
+                    </div>
+                    <div>
+                        <h1 class="title-font text-3xl font-semibold tracking-tighter">Quizzy Pro</h1>
+                        <p class="text-cyan-100 text-sm font-medium -mt-1">Unit 1: Introduction (30 MCQs)</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-x-3">
+                    <div onclick="restartQuiz()" 
+                         class="flex items-center gap-x-2 bg-white/20 hover:bg-white/30 transition-colors px-5 py-2.5 rounded-3xl text-sm font-semibold cursor-pointer">
+                        <i class="fas fa-redo"></i>
+                        <span>Restart</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PROGRESS -->
+            <div class="h-2 bg-black/30 relative">
+                <div id="progress-bar" 
+                     class="progress-bar h-2 bg-white rounded-r-full w-0"></div>
+            </div>
+        </header>
+
+        <!-- QUIZ CONTAINER -->
+        <div id="quiz-screen" class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-x-3">
+                    <div class="px-5 py-1.5 bg-zinc-900 rounded-3xl text-sm font-mono font-medium text-cyan-400" id="question-counter">1 / 30</div>
+                </div>
+                <div onclick="showReviewModal()" 
+                     class="text-xs uppercase tracking-widest font-semibold text-zinc-400 hover:text-cyan-300 cursor-pointer flex items-center gap-x-1">
+                    <i class="fas fa-list-check"></i>
+                    <span>Review All</span>
+                </div>
+            </div>
+
+            <!-- QUESTION -->
+            <div id="question-card" class="question-card bg-zinc-900 rounded-3xl p-8 shadow-2xl border border-zinc-800">
+                <p id="question-text" class="text-2xl leading-tight font-medium text-white"></p>
+                
+                <!-- OPTIONS -->
+                <div id="options-container" class="mt-10 space-y-4"></div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="flex gap-4 mt-10">
+                <button onclick="prevQuestion()" 
+                        id="btn-prev"
+                        class="flex-1 bg-zinc-900 hover:bg-zinc-800 transition-colors text-white font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3 shadow-inner">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Previous</span>
+                </button>
+                
+                <button onclick="nextQuestion()" 
+                        id="btn-next"
+                        class="flex-1 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 transition-all font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3 shadow-lg shadow-cyan-500/30">
+                    <span id="next-text">Next</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="results-screen" class="hidden p-6">
+            <div class="bg-zinc-900 rounded-3xl p-10 text-center">
+                <!-- Trophy -->
+                <div id="trophy" class="mx-auto w-32 h-32 flex items-center justify-center text-8xl mb-6"></div>
+                
+                <h2 class="text-6xl font-bold text-white mb-1" id="score">92</h2>
+                <p class="text-cyan-400 text-2xl font-semibold">Score • <span id="percentage">92</span>%</p>
+                
+                <div class="grid grid-cols-3 gap-6 mt-12">
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-emerald-400">
+                            <i class="fas fa-check-circle text-3xl"></i>
+                        </div>
+                        <div id="correct-count" class="text-5xl font-bold mt-4 text-white">28</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">CORRECT</div>
+                    </div>
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-red-400">
+                            <i class="fas fa-times-circle text-3xl"></i>
+                        </div>
+                        <div id="incorrect-count" class="text-5xl font-bold mt-4 text-white">1</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">INCORRECT</div>
+                    </div>
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-amber-400">
+                            <i class="fas fa-forward text-3xl"></i>
+                        </div>
+                        <div id="skipped-count" class="text-5xl font-bold mt-4 text-white">1</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">SKIPPED</div>
+                    </div>
+                </div>
+
+                <!-- Insight -->
+                <div class="mt-10 bg-zinc-800/70 rounded-3xl p-8 text-left">
+                    <p id="insight-text" class="text-zinc-300 leading-relaxed text-lg"></p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-4 mt-12">
+                    <button onclick="showReviewModal()" 
+                            class="flex-1 py-6 bg-white text-zinc-900 rounded-3xl font-semibold flex items-center justify-center gap-x-3 hover:scale-105 transition-transform">
+                        <i class="fas fa-list-check"></i>
+                        REVIEW ALL ANSWERS
+                    </button>
+                    
+                    <button onclick="shareResults()" 
+                            class="flex-1 py-6 bg-zinc-800 hover:bg-zinc-700 rounded-3xl font-semibold flex items-center justify-center gap-x-3 transition-colors">
+                        <i class="fas fa-share-nodes"></i>
+                        SHARE RESULT
+                    </button>
+                </div>
+                
+                <button onclick="restartQuiz()" 
+                        class="mt-6 w-full py-5 text-cyan-400 font-medium flex items-center justify-center gap-x-2 hover:text-cyan-300">
+                    <i class="fas fa-rotate"></i>
+                    <span>Restart Quiz</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REVIEW MODAL -->
+    <div id="review-modal" onclick="if(event.target.id==='review-modal')hideReviewModal()" 
+         class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="modal bg-zinc-900 w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="px-8 py-6 border-b border-zinc-700 flex items-center justify-between">
+                <div class="font-semibold text-xl">Review All Answers</div>
+                <button onclick="hideReviewModal()" 
+                        class="w-9 h-9 flex items-center justify-center text-3xl leading-none text-zinc-400 hover:text-white">×</button>
+            </div>
+            
+            <!-- Content -->
+            <div id="review-list" class="flex-1 overflow-auto p-6 space-y-8">
+                <!-- JS injected -->
+            </div>
+            
+            <div class="p-6 border-t border-zinc-700">
+                <button onclick="hideReviewModal()" 
+                        class="w-full py-5 bg-cyan-500 hover:bg-cyan-400 transition-colors rounded-3xl text-white font-semibold">
+                    Close Review
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================== ORIGINAL QUESTIONS (30 exact from PDF) ======================
+        const originalQuestions = [
+            {
+                question: "What is the definition of Multimedia?",
+                options: [
+                    "A linear presentation of audio and video files",
+                    "The combination of multiple media elements (text, graphics, audio, video, and animation) controlled by a computer to convey information or create an experience.",
+                    "Only static images and text stored on a hard disk",
+                    "Any content that uses a single media type"
+                ],
+                correctAnswer: "The combination of multiple media elements (text, graphics, audio, video, and animation) controlled by a computer to convey information or create an experience."
+            },
+            {
+                question: "Which of the following is listed as a Multimedia application in Education?",
+                options: [
+                    "Interactive billboards",
+                    "Interactive e-learning modules, virtual labs, online courses (e.g., Coursera, Byju's)",
+                    "Product demos for e-commerce",
+                    "Digital signage in government offices"
+                ],
+                correctAnswer: "Interactive e-learning modules, virtual labs, online courses (e.g., Coursera, Byju's)"
+            },
+            {
+                question: "Which of the following is listed as a Multimedia application in Business?",
+                options: [
+                    "Animated movies and special effects",
+                    "Corporate presentations, video conferencing (Zoom/Teams), product demos, virtual training",
+                    "3D visualization of organs for surgery",
+                    "Interactive kiosks for public information"
+                ],
+                correctAnswer: "Corporate presentations, video conferencing (Zoom/Teams), product demos, virtual training"
+            },
+            {
+                question: "Which of the following is listed as a Multimedia application in Entertainment?",
+                options: [
+                    "Telemedicine and patient education systems",
+                    "Video games, streaming services (Netflix/YouTube), animated movies, special effects in films",
+                    "Training for defense personnel using simulators",
+                    "Online banner ads"
+                ],
+                correctAnswer: "Video games, streaming services (Netflix/YouTube), animated movies, special effects in films"
+            },
+            {
+                question: "Which of the following is listed as a Multimedia application in Medicine?",
+                options: [
+                    "Video conferencing and product demos",
+                    "3D visualization of organs for surgery simulation, telemedicine, patient education systems",
+                    "Streaming services like YouTube",
+                    "Interactive billboards"
+                ],
+                correctAnswer: "3D visualization of organs for surgery simulation, telemedicine, patient education systems"
+            },
+            {
+                question: "Which of the following is listed as a Multimedia application in Government?",
+                options: [
+                    "Online courses on Coursera",
+                    "Interactive kiosks for public information, digital signage, training for defense personnel using simulators",
+                    "Virtual labs for students",
+                    "Background music in video games"
+                ],
+                correctAnswer: "Interactive kiosks for public information, digital signage, training for defense personnel using simulators"
+            },
+            {
+                question: "Which of the following is listed as a Multimedia application in Advertising?",
+                options: [
+                    "Virtual training programs",
+                    "Interactive billboards, online banner ads, product catalogues",
+                    "Patient education systems",
+                    "Animated movies"
+                ],
+                correctAnswer: "Interactive billboards, online banner ads, product catalogues"
+            },
+            {
+                question: "The global structure of Multimedia refers to how multimedia elements are organized and linked together in a non-linear fashion, much like what?",
+                options: [
+                    "A printed textbook",
+                    "The World Wide Web",
+                    "A single video file",
+                    "A database table"
+                ],
+                correctAnswer: "The World Wide Web"
+            },
+            {
+                question: "The global structure of Multimedia is based on the concept of:",
+                options: [
+                    "Hypertext only",
+                    "Hypermedia",
+                    "Linear media",
+                    "Static graphics"
+                ],
+                correctAnswer: "Hypermedia"
+            },
+            {
+                question: "What is Hypertext?",
+                options: [
+                    "An extension that includes links to images, sound, and video",
+                    "A non-linear, linked structure of text (e.g., Wikipedia articles with blue hyperlinks)",
+                    "A sequence of computer-generated drawings",
+                    "The internal format used by computers"
+                ],
+                correctAnswer: "A non-linear, linked structure of text (e.g., Wikipedia articles with blue hyperlinks)"
+            },
+            {
+                question: "What is Hypermedia?",
+                options: [
+                    "A non-linear structure of text only",
+                    "An extension of hypertext that includes links to other media like images, sound, and video (e.g., A webpage with a link that opens a YouTube video)",
+                    "Physical storage devices",
+                    "Input tools like keyboard and mouse"
+                ],
+                correctAnswer: "An extension of hypertext that includes links to other media like images, sound, and video (e.g., A webpage with a link that opens a YouTube video)"
+            },
+            {
+                question: "In Hypermedia structure, what are Nodes?",
+                options: [
+                    "The connections or references between units",
+                    "The fundamental units of information (a single page, a paragraph, an image)",
+                    "The starting and ending points of a link",
+                    "The physical channel for data transfer"
+                ],
+                correctAnswer: "The fundamental units of information (a single page, a paragraph, an image)"
+            },
+            {
+                question: "In Hypermedia structure, what are Links?",
+                options: [
+                    "The starting points of navigation",
+                    "The connections or references between nodes (hyperlinks)",
+                    "The fundamental units of information",
+                    "Human perception methods"
+                ],
+                correctAnswer: "The connections or references between nodes (hyperlinks)"
+            },
+            {
+                question: "In Hypermedia structure, what are Anchors?",
+                options: [
+                    "The connections between nodes",
+                    "The starting and ending points of a link (the clickable text or image)",
+                    "The internal computer format of data",
+                    "Output devices such as monitors"
+                ],
+                correctAnswer: "The starting and ending points of a link (the clickable text or image)"
+            },
+            {
+                question: "Which of the following is the exact Real-World Example given for the global structure of Multimedia?",
+                options: [
+                    "Watching a DVD movie",
+                    "Browsing an online news portal. You read a text article (node) about a sports event and click on a hyperlinked photo (anchor) within the text (link), which opens a video interview of the player (another node)",
+                    "Printing a PDF document",
+                    "Listening to MP3 files"
+                ],
+                correctAnswer: "Browsing an online news portal. You read a text article (node) about a sports event and click on a hyperlinked photo (anchor) within the text (link), which opens a video interview of the player (another node)"
+            },
+            {
+                question: "What is a Perception Medium?",
+                options: [
+                    "The internal computer format of information",
+                    "How humans perceive information (Text: sight, Audio: hearing, Tactile: touch)",
+                    "The input/output tools used",
+                    "Physical devices that hold data"
+                ],
+                correctAnswer: "How humans perceive information (Text: sight, Audio: hearing, Tactile: touch)"
+            },
+            {
+                question: "What is a Representation Medium?",
+                options: [
+                    "Human perception methods",
+                    "The internal computer format of the information (Text: ASCII, Unicode; Image: JPEG, PNG, GIF; Audio: MP3, WAV)",
+                    "Input/output hardware",
+                    "Physical transmission channels"
+                ],
+                correctAnswer: "The internal computer format of the information (Text: ASCII, Unicode; Image: JPEG, PNG, GIF; Audio: MP3, WAV)"
+            },
+            {
+                question: "What is a Presentation Medium?",
+                options: [
+                    "Storage devices like HDD",
+                    "The input/output tools used (Input: Keyboard, mouse, microphone, camera; Output: Monitor, speaker, printer)",
+                    "How humans perceive information",
+                    "The physical channel for data transfer"
+                ],
+                correctAnswer: "The input/output tools used (Input: Keyboard, mouse, microphone, camera; Output: Monitor, speaker, printer)"
+            },
+            {
+                question: "What is a Storage Medium?",
+                options: [
+                    "Input devices",
+                    "The physical devices that hold the data (HDD, SSD, CD-ROM, USB flash drive)",
+                    "Human perception of information",
+                    "Network cables"
+                ],
+                correctAnswer: "The physical devices that hold the data (HDD, SSD, CD-ROM, USB flash drive)"
+            },
+            {
+                question: "What is a Transmission Medium?",
+                options: [
+                    "Output devices like speakers",
+                    "The physical channel for data transfer (Copper wire, Fiber optic cable, Radio waves)",
+                    "The internal computer format",
+                    "Perception medium"
+                ],
+                correctAnswer: "The physical channel for data transfer (Copper wire, Fiber optic cable, Radio waves)"
+            },
+            {
+                question: "What is the definition of a Multimedia System?",
+                options: [
+                    "A computer used only for word processing",
+                    "A computer-based system capable of creating, integrating, storing, retrieving, and presenting two or more types of media",
+                    "Any device that plays audio",
+                    "A network router"
+                ],
+                correctAnswer: "A computer-based system capable of creating, integrating, storing, retrieving, and presenting two or more types of media"
+            },
+            {
+                question: "Which key property of a Multimedia System means all operations are managed by a computer?",
+                options: [
+                    "Integration",
+                    "Computer-Controlled",
+                    "Interactivity",
+                    "Digital Representation"
+                ],
+                correctAnswer: "Computer-Controlled"
+            },
+            {
+                question: "Which key property of a Multimedia System means all media elements must be combined as a single cohesive unit?",
+                options: [
+                    "Computer-Controlled",
+                    "Integration",
+                    "Interactivity",
+                    "Digital Representation"
+                ],
+                correctAnswer: "Integration"
+            },
+            {
+                question: "Which key property of a Multimedia System gives the user control over presentation (pause, play, navigate)?",
+                options: [
+                    "Digital Representation",
+                    "Interactivity",
+                    "Integration",
+                    "Computer-Controlled"
+                ],
+                correctAnswer: "Interactivity"
+            },
+            {
+                question: "Which key property of a Multimedia System states that all media must be stored in binary data?",
+                options: [
+                    "Integration",
+                    "Digital Representation",
+                    "Interactivity",
+                    "Computer-Controlled"
+                ],
+                correctAnswer: "Digital Representation"
+            },
+            {
+                question: "Which characteristic of a Multimedia System requires a powerful CPU for encoding/decoding media?",
+                options: [
+                    "Large Storage Capacity",
+                    "Very High Processing Power",
+                    "High-Speed Network",
+                    "Multitasking Operating System"
+                ],
+                correctAnswer: "Very High Processing Power"
+            },
+            {
+                question: "Which characteristic of a Multimedia System addresses the large size of multimedia files?",
+                options: [
+                    "Very High Processing Power",
+                    "Large Storage Capacity and High-Speed Access",
+                    "Specialized Hardware & Software",
+                    "High-Speed Network"
+                ],
+                correctAnswer: "Large Storage Capacity and High-Speed Access"
+            },
+            {
+                question: "Which characteristic is essential for streaming multimedia content like Netflix?",
+                options: [
+                    "Multitasking Operating System",
+                    "High-Speed Network",
+                    "Very High Processing Power",
+                    "Large Storage Capacity"
+                ],
+                correctAnswer: "High-Speed Network"
+            },
+            {
+                question: "Which characteristic requires the OS to handle multiple tasks simultaneously (audio + video)?",
+                options: [
+                    "High-Speed Network",
+                    "Multitasking Operating System",
+                    "Specialized Hardware & Software",
+                    "Large Storage Capacity"
+                ],
+                correctAnswer: "Multitasking Operating System"
+            },
+            {
+                question: "Which characteristic of a Multimedia System requires sound cards, GPUs, codecs and media players?",
+                options: [
+                    "High-Speed Network",
+                    "Specialized Hardware & Software",
+                    "Very High Processing Power",
+                    "Multitasking Operating System"
+                ],
+                correctAnswer: "Specialized Hardware & Software"
+            }
+        ];
+
+        // ====================== QUIZ STATE ======================
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = [];
+        let isAnswered = [];
+
+        // Fisher-Yates shuffle
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function prepareShuffledQuestions() {
+            shuffledQuestions = originalQuestions.map(q => {
+                const shuffledOpts = shuffleArray(q.options);
+                const correctIndex = shuffledOpts.indexOf(q.correctAnswer);
+                return {
+                    question: q.question,
+                    options: shuffledOpts,
+                    correctIndex: correctIndex
+                };
+            });
+        }
+
+        // ====================== RENDER QUESTION ======================
+        function renderQuestion() {
+            const q = shuffledQuestions[currentIndex];
+            
+            document.getElementById("question-counter").textContent = `${currentIndex + 1} / 30`;
+            document.getElementById("question-text").textContent = q.question;
+            
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+            
+            const labels = ["A", "B", "C", "D"];
+            
+            q.options.forEach((option, idx) => {
+                const btn = document.createElement("button");
+                btn.className = `option-btn w-full text-left px-7 py-6 rounded-3xl border-2 border-zinc-700 bg-zinc-800 hover:border-cyan-400 transition-all flex items-start gap-4 group`;
+                btn.innerHTML = `
+                    <span class="w-8 h-8 flex-shrink-0 rounded-2xl bg-zinc-700 text-cyan-400 font-bold flex items-center justify-center text-lg transition-colors group-hover:bg-cyan-400 group-hover:text-white">${labels[idx]}</span>
+                    <span class="text-lg leading-tight">${option}</span>
+                `;
+                
+                btn.onclick = () => selectOption(idx);
+                container.appendChild(btn);
+            });
+            
+            updateProgress();
+            updateNavigation();
+            
+            // If already answered, show feedback
+            if (isAnswered[currentIndex]) {
+                showFeedback();
+            }
+        }
+
+        function selectOption(selectedIdx) {
+            if (isAnswered[currentIndex]) return;
+            
+            isAnswered[currentIndex] = true;
+            userAnswers[currentIndex] = selectedIdx;
+            
+            showFeedback();
+            updateNavigation();
+        }
+
+        function showFeedback() {
+            const q = shuffledQuestions[currentIndex];
+            const container = document.getElementById("options-container");
+            const buttons = container.children;
+            const userChoice = userAnswers[currentIndex];
+            
+            for (let i = 0; i < buttons.length; i++) {
+                const btn = buttons[i];
+                
+                if (i === q.correctIndex) {
+                    btn.classList.add("correct");
+                    btn.innerHTML += `<span class="ml-auto text-white text-2xl">✓</span>`;
+                }
+                
+                if (i === userChoice) {
+                    if (userChoice === q.correctIndex) {
+                        btn.classList.add("selected-correct");
+                    } else {
+                        btn.classList.add("selected-wrong");
+                        btn.innerHTML += `<span class="ml-auto text-white text-2xl">✕</span>`;
+                    }
+                }
+                
+                btn.onclick = null;
+                btn.style.cursor = "default";
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / 30) * 100;
+            document.getElementById("progress-bar").style.width = `${progress}%`;
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById("btn-prev");
+            const nextBtn = document.getElementById("btn-next");
+            const nextText = document.getElementById("next-text");
+            
+            prevBtn.disabled = currentIndex === 0;
+            prevBtn.style.opacity = currentIndex === 0 ? "0.4" : "1";
+            
+            if (currentIndex === 29) {
+                nextText.textContent = "Finish Quiz";
+            } else {
+                nextText.textContent = "Next";
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < 29) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        // ====================== RESULTS ======================
+        function calculateResults() {
+            let correct = 0;
+            let incorrect = 0;
+            let skipped = 0;
+            
+            for (let i = 0; i < 30; i++) {
+                if (!isAnswered[i]) {
+                    skipped++;
+                } else if (userAnswers[i] === shuffledQuestions[i].correctIndex) {
+                    correct++;
+                } else {
+                    incorrect++;
+                }
+            }
+            
+            const percentage = Math.round((correct / 30) * 100);
+            return { correct, incorrect, skipped, percentage };
+        }
+
+        function showResults() {
+            document.getElementById("quiz-screen").classList.add("hidden");
+            const resultsScreen = document.getElementById("results-screen");
+            resultsScreen.classList.remove("hidden");
+            
+            const stats = calculateResults();
+            
+            document.getElementById("score").textContent = stats.correct;
+            document.getElementById("percentage").textContent = stats.percentage;
+            document.getElementById("correct-count").textContent = stats.correct;
+            document.getElementById("incorrect-count").textContent = stats.incorrect;
+            document.getElementById("skipped-count").textContent = stats.skipped;
+            
+            // Trophy
+            const trophyEl = document.getElementById("trophy");
+            if (stats.percentage >= 80) {
+                trophyEl.innerHTML = "🏆";
+            } else if (stats.percentage >= 60) {
+                trophyEl.innerHTML = "🎉";
+            } else {
+                trophyEl.innerHTML = "📖";
+            }
+            
+            // Insight
+            let insight = "";
+            if (stats.percentage >= 90) {
+                insight = "Outstanding performance! You have completely mastered the fundamentals of Multimedia and its global structure.";
+            } else if (stats.percentage >= 75) {
+                insight = "Excellent work! Strong understanding of media types, system properties, and characteristics.";
+            } else if (stats.percentage >= 60) {
+                insight = "Good job! You understand the core concepts. Review hypermedia structure and challenges for perfection.";
+            } else {
+                insight = "Keep learning! Multimedia is exciting — focus on the 5 types of medium and system characteristics.";
+            }
+            document.getElementById("insight-text").innerHTML = insight;
+        }
+
+        // ====================== REVIEW MODAL ======================
+        function showReviewModal() {
+            const modal = document.getElementById("review-modal");
+            const list = document.getElementById("review-list");
+            list.innerHTML = "";
+            
+            shuffledQuestions.forEach((q, i) => {
+                const answered = isAnswered[i];
+                const userIdx = userAnswers[i];
+                const isCorrect = answered && (userIdx === q.correctIndex);
+                
+                const div = document.createElement("div");
+                div.className = "border border-zinc-700 rounded-3xl p-6";
+                div.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-x-3">
+                                <span class="font-mono text-xs bg-zinc-800 px-3 py-1 rounded-2xl">${i+1}</span>
+                                <p class="font-medium text-white leading-tight">${q.question}</p>
+                            </div>
+                            
+                            <div class="mt-6 grid grid-cols-1 gap-4">
+                                ${q.options.map((opt, idx) => {
+                                    let statusHTML = "";
+                                    if (answered && idx === userIdx) {
+                                        statusHTML = isCorrect 
+                                            ? `<span class="text-emerald-400 text-xs font-bold">YOUR ANSWER ✓</span>` 
+                                            : `<span class="text-red-400 text-xs font-bold">YOUR ANSWER ✕</span>`;
+                                    }
+                                    if (idx === q.correctIndex) {
+                                        statusHTML += ` <span class="text-emerald-400 text-xs font-bold">CORRECT</span>`;
+                                    }
+                                    return `
+                                        <div class="flex justify-between items-center ${idx === q.correctIndex ? 'text-emerald-400' : 'text-zinc-300'}">
+                                            <span>${String.fromCharCode(65 + idx)}. ${opt}</span>
+                                            ${statusHTML}
+                                        </div>
+                                    `;
+                                }).join("")}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function hideReviewModal() {
+            const modal = document.getElementById("review-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        // ====================== SHARE ======================
+        function shareResults() {
+            const stats = calculateResults();
+            const text = `🎬 I just scored ${stats.percentage}% on Quizzy Pro • Unit 1: Introduction!\n\n✅ Correct: ${stats.correct}\n❌ Incorrect: ${stats.incorrect}\n⏭️ Skipped: ${stats.skipped}\n\nReady to test your Multimedia knowledge? Try Quizzy Pro!`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const origText = event.currentTarget.innerHTML;
+                event.currentTarget.innerHTML = `<i class="fas fa-check"></i> COPIED!`;
+                setTimeout(() => {
+                    event.currentTarget.innerHTML = origText;
+                }, 2000);
+            });
+        }
+
+        // ====================== RESTART ======================
+        function restartQuiz() {
+            currentIndex = 0;
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            
+            prepareShuffledQuestions();
+            
+            document.getElementById("quiz-screen").classList.remove("hidden");
+            document.getElementById("results-screen").classList.add("hidden");
+            
+            renderQuestion();
+            
+            console.log("%cQuizzy Pro • Unit 1: Introduction restarted with fresh random order!", "color:#67e8f9; font-weight:600");
+        }
+
+        // ====================== KEYBOARD SUPPORT ======================
+        function handleKeyboard(e) {
+            if (document.getElementById("results-screen").classList.contains("hidden") === false) return;
+            
+            if (e.key === "ArrowRight") {
+                nextQuestion();
+            }
+            if (e.key === "ArrowLeft") {
+                prevQuestion();
+            }
+            if (e.key >= "1" && e.key <= "4" && !isAnswered[currentIndex]) {
+                const idx = parseInt(e.key) - 1;
+                selectOption(idx);
+            }
+        }
+
+        // ====================== TAILWIND + INIT ======================
+        function initializeTailwind() {
+            // Tailwind already loaded via CDN
+        }
+
+        // ====================== START ======================
+        function startQuiz() {
+            prepareShuffledQuestions();
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            currentIndex = 0;
+            
+            renderQuestion();
+            
+            // Keyboard
+            document.addEventListener("keydown", handleKeyboard);
+            
+            console.log("%c✅ Quizzy Pro • Unit 1: Introduction loaded successfully! (30 MCQs from official PDF)", "color:#67e8f9; font-family:monospace; font-size:13px");
+        }
+
+        // Boot the app
+        window.onload = function() {
+            initializeTailwind();
+            startQuiz();
+        };
+    </script>
+</body>
+</html>
