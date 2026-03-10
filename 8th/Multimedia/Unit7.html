@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzy Pro • Unit 7: Multimedia Design (30 MCQs)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap');
+        
+        :root {
+            --primary: 192 132 252;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .title-font {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .option-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgb(192 132 252 / 0.3);
+        }
+        
+        .option-btn.selected-correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .option-btn.selected-wrong {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .option-btn.correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .progress-bar {
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal {
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .question-card {
+            animation: fadeSlide 0.4s ease forwards;
+        }
+        
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+    <div class="max-w-3xl mx-auto">
+        <!-- HEADER -->
+        <header class="bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-2xl">
+            <div class="px-6 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-x-4">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center text-4xl shadow-inner">
+                        🎨
+                    </div>
+                    <div>
+                        <h1 class="title-font text-3xl font-semibold tracking-tighter">Quizzy Pro</h1>
+                        <p class="text-purple-100 text-sm font-medium -mt-1">Unit 7: Multimedia Design (30 MCQs)</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-x-3">
+                    <div onclick="restartQuiz()" 
+                         class="flex items-center gap-x-2 bg-white/20 hover:bg-white/30 transition-colors px-5 py-2.5 rounded-3xl text-sm font-semibold cursor-pointer">
+                        <i class="fas fa-redo"></i>
+                        <span>Restart</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PROGRESS -->
+            <div class="h-2 bg-black/30 relative">
+                <div id="progress-bar" 
+                     class="progress-bar h-2 bg-white rounded-r-full w-0"></div>
+            </div>
+        </header>
+
+        <!-- QUIZ CONTAINER -->
+        <div id="quiz-screen" class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-x-3">
+                    <div class="px-5 py-1.5 bg-zinc-900 rounded-3xl text-sm font-mono font-medium text-purple-400" id="question-counter">1 / 30</div>
+                </div>
+                <!-- <div onclick="showReviewModal()" 
+                     class="text-xs uppercase tracking-widest font-semibold text-zinc-400 hover:text-purple-300 cursor-pointer flex items-center gap-x-1">
+                    <i class="fas fa-list-check"></i>
+                    <span>Review All</span>
+                </div> -->
+            </div>
+
+            <!-- QUESTION -->
+            <div id="question-card" class="question-card bg-zinc-900 rounded-3xl p-8 shadow-2xl border border-zinc-800">
+                <p id="question-text" class="text-2xl leading-tight font-medium text-white"></p>
+                
+                <!-- OPTIONS -->
+                <div id="options-container" class="mt-10 space-y-4"></div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="flex gap-4 mt-10">
+                <button onclick="prevQuestion()" 
+                        id="btn-prev"
+                        class="flex-1 bg-zinc-900 hover:bg-zinc-800 transition-colors text-white font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3 shadow-inner">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Previous</span>
+                </button>
+                
+                <button onclick="nextQuestion()" 
+                        id="btn-next"
+                        class="flex-1 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-400 hover:to-purple-400 transition-all font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3 shadow-lg shadow-purple-500/30">
+                    <span id="next-text">Next</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="results-screen" class="hidden p-6">
+            <div class="bg-zinc-900 rounded-3xl p-10 text-center">
+                <!-- Trophy -->
+                <div id="trophy" class="mx-auto w-32 h-32 flex items-center justify-center text-8xl mb-6"></div>
+                
+                <h2 class="text-6xl font-bold text-white mb-1" id="score">92</h2>
+                <p class="text-purple-400 text-2xl font-semibold">Score • <span id="percentage">92</span>%</p>
+                
+                <div class="grid grid-cols-3 gap-6 mt-12">
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-emerald-400">
+                            <i class="fas fa-check-circle text-3xl"></i>
+                        </div>
+                        <div id="correct-count" class="text-5xl font-bold mt-4 text-white">28</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">CORRECT</div>
+                    </div>
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-red-400">
+                            <i class="fas fa-times-circle text-3xl"></i>
+                        </div>
+                        <div id="incorrect-count" class="text-5xl font-bold mt-4 text-white">1</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">INCORRECT</div>
+                    </div>
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-amber-400">
+                            <i class="fas fa-forward text-3xl"></i>
+                        </div>
+                        <div id="skipped-count" class="text-5xl font-bold mt-4 text-white">1</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">SKIPPED</div>
+                    </div>
+                </div>
+
+                <!-- Insight -->
+                <div class="mt-10 bg-zinc-800/70 rounded-3xl p-8 text-left">
+                    <p id="insight-text" class="text-zinc-300 leading-relaxed text-lg"></p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-4 mt-12">
+                    <button onclick="showReviewModal()" 
+                            class="flex-1 py-6 bg-white text-zinc-900 rounded-3xl font-semibold flex items-center justify-center gap-x-3 hover:scale-105 transition-transform">
+                        <i class="fas fa-list-check"></i>
+                        REVIEW ALL ANSWERS
+                    </button>
+                    
+                    <button onclick="shareResults()" 
+                            class="flex-1 py-6 bg-zinc-800 hover:bg-zinc-700 rounded-3xl font-semibold flex items-center justify-center gap-x-3 transition-colors">
+                        <i class="fas fa-share-nodes"></i>
+                        SHARE RESULT
+                    </button>
+                </div>
+                
+                <button onclick="restartQuiz()" 
+                        class="mt-6 w-full py-5 text-purple-400 font-medium flex items-center justify-center gap-x-2 hover:text-purple-300">
+                    <i class="fas fa-rotate"></i>
+                    <span>Restart Quiz</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REVIEW MODAL -->
+    <div id="review-modal" onclick="if(event.target.id==='review-modal')hideReviewModal()" 
+         class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="modal bg-zinc-900 w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="px-8 py-6 border-b border-zinc-700 flex items-center justify-between">
+                <div class="font-semibold text-xl">Review All Answers</div>
+                <button onclick="hideReviewModal()" 
+                        class="w-9 h-9 flex items-center justify-center text-3xl leading-none text-zinc-400 hover:text-white">×</button>
+            </div>
+            
+            <!-- Content -->
+            <div id="review-list" class="flex-1 overflow-auto p-6 space-y-8">
+                <!-- JS injected -->
+            </div>
+            
+            <div class="p-6 border-t border-zinc-700">
+                <button onclick="hideReviewModal()" 
+                        class="w-full py-5 bg-purple-500 hover:bg-purple-400 transition-colors rounded-3xl text-white font-semibold">
+                    Close Review
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================== ORIGINAL QUESTIONS (30 exact from PDF) ======================
+        const originalQuestions = [
+            {
+                question: "What is the first core development phase in the Multimedia Lifecycle?",
+                options: [
+                    "Design Phase",
+                    "Analysis Phase: Understanding the problem, user needs, and project scope",
+                    "Development Phase",
+                    "Evaluation and Testing Phase"
+                ],
+                correctAnswer: "Analysis Phase: Understanding the problem, user needs, and project scope"
+            },
+            {
+                question: "What happens in the Design Phase of multimedia development?",
+                options: [
+                    "Actual creation of media elements",
+                    "Creating a blueprint of the multimedia application, including its structure, interface, and content",
+                    "Integrating media using authoring tools",
+                    "Testing for bugs"
+                ],
+                correctAnswer: "Creating a blueprint of the multimedia application, including its structure, interface, and content"
+            },
+            {
+                question: "Which phase involves the actual creation and assembly of all multimedia elements (text, graphics, audio, video)?",
+                options: [
+                    "Implementation Phase",
+                    "Development Phase (or Production Phase)",
+                    "Analysis Phase",
+                    "Evaluation Phase"
+                ],
+                correctAnswer: "Development Phase (or Production Phase)"
+            },
+            {
+                question: "What is the purpose of the Implementation Phase (or Programming Phase)?",
+                options: [
+                    "Gathering user requirements",
+                    "Integrating all the developed media elements into a cohesive application using authoring tools or programming languages",
+                    "Testing usability",
+                    "Creating storyboards"
+                ],
+                correctAnswer: "Integrating all the developed media elements into a cohesive application using authoring tools or programming languages"
+            },
+            {
+                question: "Which phase involves rigorously testing the application for bugs, usability, and performance?",
+                options: [
+                    "Design Phase",
+                    "Evaluation and Testing Phase",
+                    "Development Phase",
+                    "Analysis Phase"
+                ],
+                correctAnswer: "Evaluation and Testing Phase"
+            },
+            {
+                question: "Who oversees the entire project, manages budget, timeline, and communicates with stakeholders?",
+                options: [
+                    "Content Expert / SME",
+                    "Project Manager",
+                    "Graphic Artist",
+                    "QA Tester"
+                ],
+                correctAnswer: "Project Manager"
+            },
+            {
+                question: "Who provides the domain knowledge and ensures the accuracy of information in a multimedia project?",
+                options: [
+                    "Multimedia Designer",
+                    "Content Expert / Subject Matter Expert (SME)",
+                    "Audio/Video Specialist",
+                    "Programmer"
+                ],
+                correctAnswer: "Content Expert / Subject Matter Expert (SME)"
+            },
+            {
+                question: "Who is responsible for the overall look and feel, visual concept, and user experience?",
+                options: [
+                    "Project Manager",
+                    "Multimedia Designer / Creative Director",
+                    "QA Tester",
+                    "Instructional Designer"
+                ],
+                correctAnswer: "Multimedia Designer / Creative Director"
+            },
+            {
+                question: "Who creates all visual elements like images, icons, backgrounds, and animations?",
+                options: [
+                    "Audio/Video Specialist",
+                    "Graphic Artist / Illustrator",
+                    "Programmer",
+                    "Content Expert"
+                ],
+                correctAnswer: "Graphic Artist / Illustrator"
+            },
+            {
+                question: "Who is responsible for recording, editing, and producing high-quality sound and video elements?",
+                options: [
+                    "Instructional Designer",
+                    "Audio/Video Specialist",
+                    "Project Manager",
+                    "QA Tester"
+                ],
+                correctAnswer: "Audio/Video Specialist"
+            },
+            {
+                question: "Who designs the learning experience in educational multimedia projects?",
+                options: [
+                    "Graphic Artist",
+                    "Instructional Designer (for educational multimedia)",
+                    "Multimedia Designer",
+                    "Programmer"
+                ],
+                correctAnswer: "Instructional Designer (for educational multimedia)"
+            },
+            {
+                question: "Who uses authoring tools or programming languages to integrate media and implement interactivity?",
+                options: [
+                    "QA Tester",
+                    "Programmer / Authoring Specialist",
+                    "Content Expert",
+                    "Project Manager"
+                ],
+                correctAnswer: "Programmer / Authoring Specialist"
+            },
+            {
+                question: "Who systematically tests the application to find bugs and ensure quality standards?",
+                options: [
+                    "Multimedia Designer",
+                    "Quality Assurance (QA) Tester",
+                    "Audio/Video Specialist",
+                    "Instructional Designer"
+                ],
+                correctAnswer: "Quality Assurance (QA) Tester"
+            },
+            {
+                question: "In the Pixar Real-World Example, which roles are part of the team for a film like 'Toy Story'?",
+                options: [
+                    "Only programmers",
+                    "Project Manager (producer), Content Experts (storyboard artists, writers), Graphic Artists, Audio/Video Specialists, and Programmers (technical directors)",
+                    "Only QA testers",
+                    "Only graphic artists"
+                ],
+                correctAnswer: "Project Manager (producer), Content Experts (storyboard artists, writers), Graphic Artists, Audio/Video Specialists, and Programmers (technical directors)"
+            },
+            {
+                question: "What is the first key activity in the Analysis Phase?",
+                options: [
+                    "Creating flowcharts",
+                    "Requirements Gathering: Identifying the project's goals, target audience, and purpose",
+                    "Content Creation",
+                    "Alpha Testing"
+                ],
+                correctAnswer: "Requirements Gathering: Identifying the project's goals, target audience, and purpose"
+            },
+            {
+                question: "What activity in the Analysis Phase focuses on understanding the characteristics of end-users?",
+                options: [
+                    "Technical Analysis",
+                    "User Analysis: Understanding the characteristics of the end-users (age, technical skills, needs, preferences)",
+                    "Cost and Benefit Analysis",
+                    "Storyboarding"
+                ],
+                correctAnswer: "User Analysis: Understanding the characteristics of the end-users (age, technical skills, needs, preferences)"
+            },
+            {
+                question: "What does Content Analysis involve in the Analysis Phase?",
+                options: [
+                    "Testing usability",
+                    "Determining what information needs to be presented and gathering all raw data (text, images, etc.)",
+                    "Creating Gantt charts",
+                    "Integrating media"
+                ],
+                correctAnswer: "Determining what information needs to be presented and gathering all raw data (text, images, etc.)"
+            },
+            {
+                question: "What is Technical Analysis in the Analysis Phase?",
+                options: [
+                    "Estimating ROI",
+                    "Identifying the hardware and software requirements for both development and delivery",
+                    "Recording voice-overs",
+                    "Adding interactivity"
+                ],
+                correctAnswer: "Identifying the hardware and software requirements for both development and delivery"
+            },
+            {
+                question: "What is the purpose of Cost and Benefit Analysis in the Analysis Phase?",
+                options: [
+                    "Creating storyboards",
+                    "Estimating the total cost of development and the potential benefits (ROI)",
+                    "Usability testing",
+                    "Data compression"
+                ],
+                correctAnswer: "Estimating the total cost of development and the potential benefits (ROI)"
+            },
+            {
+                question: "What is the output of the Analysis Phase?",
+                options: [
+                    "Final executable file",
+                    "A clear project definition document, a feasibility report, and an initial project schedule",
+                    "Compressed media files",
+                    "Storyboards only"
+                ],
+                correctAnswer: "A clear project definition document, a feasibility report, and an initial project schedule"
+            },
+            {
+                question: "What is Logical Design in the Design Phase?",
+                options: [
+                    "Recording audio",
+                    "Creating the structure and navigation flow of the application",
+                    "Beta testing",
+                    "Content acquisition"
+                ],
+                correctAnswer: "Creating the structure and navigation flow of the application"
+            },
+            {
+                question: "What does Flowcharting represent in the Design Phase?",
+                options: [
+                    "A visual representation of each screen like a comic strip",
+                    "A diagram that visually represents the navigation paths and user interactions",
+                    "The final compiled application",
+                    "Hardware requirements"
+                ],
+                correctAnswer: "A diagram that visually represents the navigation paths and user interactions"
+            },
+            {
+                question: "What is Storyboarding in the Design Phase?",
+                options: [
+                    "A diagram of navigation paths",
+                    "A visual representation of each key screen or scene (like a comic strip) detailing content, layout, and interactive elements",
+                    "Cost estimation",
+                    "Data compression"
+                ],
+                correctAnswer: "A visual representation of each key screen or scene (like a comic strip) detailing content, layout, and interactive elements"
+            },
+            {
+                question: "What does User Interface (UI) Design involve in the Design Phase?",
+                options: [
+                    "Feasibility study",
+                    "Designing the look and feel of the application, including screen layouts, color schemes, typography, and interactive elements",
+                    "Recording video",
+                    "Alpha testing"
+                ],
+                correctAnswer: "Designing the look and feel of the application, including screen layouts, color schemes, typography, and interactive elements"
+            },
+            {
+                question: "What is Information Architecture in the Design Phase?",
+                options: [
+                    "Creating Gantt charts",
+                    "Organizing and structuring the content logically so users can find information easily",
+                    "Programming interactivity",
+                    "Beta testing"
+                ],
+                correctAnswer: "Organizing and structuring the content logically so users can find information easily"
+            },
+            {
+                question: "What tools are used for Project Planning in the Design Phase?",
+                options: [
+                    "Only flowcharts",
+                    "Creating a detailed schedule and budget using tools like Gantt charts and PERT charts",
+                    "Video editing software",
+                    "Compression algorithms"
+                ],
+                correctAnswer: "Creating a detailed schedule and budget using tools like Gantt charts and PERT charts"
+            },
+            {
+                question: "What is the first key activity in the Development (Production) Phase?",
+                options: [
+                    "Integration",
+                    "Content Creation: Producing all the media elements (text, graphics, audio, video, animation)",
+                    "Usability testing",
+                    "Feasibility study"
+                ],
+                correctAnswer: "Content Creation: Producing all the media elements (text, graphics, audio, video, animation)"
+            },
+            {
+                question: "What does Content Acquisition and Digitization involve?",
+                options: [
+                    "Creating new animations",
+                    "Sourcing existing media and converting analog material into digital format",
+                    "Adding buttons",
+                    "Final compilation"
+                ],
+                correctAnswer: "Sourcing existing media and converting analog material into digital format"
+            },
+            {
+                question: "Why is Data Compression applied in the Development Phase?",
+                options: [
+                    "To increase file sizes",
+                    "To reduce the file sizes of images, audio, and video for efficient storage and delivery",
+                    "For storyboarding",
+                    "During alpha testing"
+                ],
+                correctAnswer: "To reduce the file sizes of images, audio, and video for efficient storage and delivery"
+            },
+            {
+                question: "What is the main activity in the Implementation Phase?",
+                options: [
+                    "Creating raw footage",
+                    "Authoring / Programming: Using multimedia authoring tools or programming languages to combine media and implement interactivity",
+                    "Feasibility study",
+                    "Content analysis"
+                ],
+                correctAnswer: "Authoring / Programming: Using multimedia authoring tools or programming languages to combine media and implement interactivity"
+            },
+            {
+                question: "What does Integration involve in the Implementation Phase?",
+                options: [
+                    "Creating storyboards",
+                    "Synchronizing different media elements (e.g., ensuring audio matches video)",
+                    "User analysis",
+                    "Cost estimation"
+                ],
+                correctAnswer: "Synchronizing different media elements (e.g., ensuring audio matches video)"
+            }
+        ];
+
+        // ====================== QUIZ STATE ======================
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = [];
+        let isAnswered = [];
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function prepareShuffledQuestions() {
+            shuffledQuestions = originalQuestions.map(q => {
+                const shuffledOpts = shuffleArray(q.options);
+                const correctIndex = shuffledOpts.indexOf(q.correctAnswer);
+                return {
+                    question: q.question,
+                    options: shuffledOpts,
+                    correctIndex: correctIndex
+                };
+            });
+        }
+
+        function renderQuestion() {
+            const q = shuffledQuestions[currentIndex];
+            
+            document.getElementById("question-counter").textContent = `${currentIndex + 1} / 30`;
+            document.getElementById("question-text").textContent = q.question;
+            
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+            
+            const labels = ["A", "B", "C", "D"];
+            
+            q.options.forEach((option, idx) => {
+                const btn = document.createElement("button");
+                btn.className = `option-btn w-full text-left px-7 py-6 rounded-3xl border-2 border-zinc-700 bg-zinc-800 hover:border-purple-400 transition-all flex items-start gap-4 group`;
+                btn.innerHTML = `
+                    <span class="w-8 h-8 flex-shrink-0 rounded-2xl bg-zinc-700 text-purple-400 font-bold flex items-center justify-center text-lg transition-colors group-hover:bg-purple-400 group-hover:text-white">${labels[idx]}</span>
+                    <span class="text-lg leading-tight">${option}</span>
+                `;
+                
+                btn.onclick = () => selectOption(idx);
+                container.appendChild(btn);
+            });
+            
+            updateProgress();
+            updateNavigation();
+            
+            if (isAnswered[currentIndex]) {
+                showFeedback();
+            }
+        }
+
+        function selectOption(selectedIdx) {
+            if (isAnswered[currentIndex]) return;
+            
+            isAnswered[currentIndex] = true;
+            userAnswers[currentIndex] = selectedIdx;
+            
+            showFeedback();
+            updateNavigation();
+        }
+
+        function showFeedback() {
+            const q = shuffledQuestions[currentIndex];
+            const container = document.getElementById("options-container");
+            const buttons = container.children;
+            const userChoice = userAnswers[currentIndex];
+            
+            for (let i = 0; i < buttons.length; i++) {
+                const btn = buttons[i];
+                
+                if (i === q.correctIndex) {
+                    btn.classList.add("correct");
+                    btn.innerHTML += `<span class="ml-auto text-white text-2xl">✓</span>`;
+                }
+                
+                if (i === userChoice) {
+                    if (userChoice === q.correctIndex) {
+                        btn.classList.add("selected-correct");
+                    } else {
+                        btn.classList.add("selected-wrong");
+                        btn.innerHTML += `<span class="ml-auto text-white text-2xl">✕</span>`;
+                    }
+                }
+                
+                btn.onclick = null;
+                btn.style.cursor = "default";
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / 30) * 100;
+            document.getElementById("progress-bar").style.width = `${progress}%`;
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById("btn-prev");
+            const nextBtn = document.getElementById("btn-next");
+            const nextText = document.getElementById("next-text");
+            
+            prevBtn.disabled = currentIndex === 0;
+            prevBtn.style.opacity = currentIndex === 0 ? "0.4" : "1";
+            
+            if (currentIndex === 29) {
+                nextText.textContent = "Finish Quiz";
+            } else {
+                nextText.textContent = "Next";
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < 29) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function calculateResults() {
+            let correct = 0;
+            let incorrect = 0;
+            let skipped = 0;
+            
+            for (let i = 0; i < 30; i++) {
+                if (!isAnswered[i]) {
+                    skipped++;
+                } else if (userAnswers[i] === shuffledQuestions[i].correctIndex) {
+                    correct++;
+                } else {
+                    incorrect++;
+                }
+            }
+            
+            const percentage = Math.round((correct / 30) * 100);
+            return { correct, incorrect, skipped, percentage };
+        }
+
+        function showResults() {
+            document.getElementById("quiz-screen").classList.add("hidden");
+            const resultsScreen = document.getElementById("results-screen");
+            resultsScreen.classList.remove("hidden");
+            
+            const stats = calculateResults();
+            
+            document.getElementById("score").textContent = stats.correct;
+            document.getElementById("percentage").textContent = stats.percentage;
+            document.getElementById("correct-count").textContent = stats.correct;
+            document.getElementById("incorrect-count").textContent = stats.incorrect;
+            document.getElementById("skipped-count").textContent = stats.skipped;
+            
+            const trophyEl = document.getElementById("trophy");
+            if (stats.percentage >= 80) {
+                trophyEl.innerHTML = "🏆";
+            } else if (stats.percentage >= 60) {
+                trophyEl.innerHTML = "🎉";
+            } else {
+                trophyEl.innerHTML = "🎨";
+            }
+            
+            let insight = "";
+            if (stats.percentage >= 90) {
+                insight = "Outstanding performance! You have completely mastered the full multimedia development lifecycle, team roles, design techniques, and UI/UX principles.";
+            } else if (stats.percentage >= 75) {
+                insight = "Excellent work! Strong understanding of analysis, design, production, and evaluation phases.";
+            } else if (stats.percentage >= 60) {
+                insight = "Good job! Solid grasp of the fundamentals. Review team roles, flowcharting/storyboarding, and ISO 14915 principles.";
+            } else {
+                insight = "Keep learning! Focus on the 5 development phases and key UI design principles.";
+            }
+            document.getElementById("insight-text").innerHTML = insight;
+        }
+
+        function showReviewModal() {
+            const modal = document.getElementById("review-modal");
+            const list = document.getElementById("review-list");
+            list.innerHTML = "";
+            
+            shuffledQuestions.forEach((q, i) => {
+                const answered = isAnswered[i];
+                const userIdx = userAnswers[i];
+                const isCorrect = answered && (userIdx === q.correctIndex);
+                
+                const div = document.createElement("div");
+                div.className = "border border-zinc-700 rounded-3xl p-6";
+                div.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-x-3">
+                                <span class="font-mono text-xs bg-zinc-800 px-3 py-1 rounded-2xl">${i+1}</span>
+                                <p class="font-medium text-white leading-tight">${q.question}</p>
+                            </div>
+                            
+                            <div class="mt-6 grid grid-cols-1 gap-4">
+                                ${q.options.map((opt, idx) => {
+                                    let statusHTML = "";
+                                    if (answered && idx === userIdx) {
+                                        statusHTML = isCorrect 
+                                            ? `<span class="text-emerald-400 text-xs font-bold">YOUR ANSWER ✓</span>` 
+                                            : `<span class="text-red-400 text-xs font-bold">YOUR ANSWER ✕</span>`;
+                                    }
+                                    if (idx === q.correctIndex) {
+                                        statusHTML += ` <span class="text-emerald-400 text-xs font-bold">CORRECT</span>`;
+                                    }
+                                    return `
+                                        <div class="flex justify-between items-center ${idx === q.correctIndex ? 'text-emerald-400' : 'text-zinc-300'}">
+                                            <span>${String.fromCharCode(65 + idx)}. ${opt}</span>
+                                            ${statusHTML}
+                                        </div>
+                                    `;
+                                }).join("")}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function hideReviewModal() {
+            const modal = document.getElementById("review-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function shareResults() {
+            const stats = calculateResults();
+            const text = `🎨 I just scored ${stats.percentage}% on Quizzy Pro • Unit 7: Multimedia Design!\n\n✅ Correct: ${stats.correct}\n❌ Incorrect: ${stats.incorrect}\n⏭️ Skipped: ${stats.skipped}\n\nMastered the full multimedia lifecycle & UI design? Try Quizzy Pro!`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.currentTarget;
+                const origHTML = btn.innerHTML;
+                btn.innerHTML = `<i class="fas fa-check"></i> COPIED!`;
+                setTimeout(() => btn.innerHTML = origHTML, 2000);
+            });
+        }
+
+        function restartQuiz() {
+            currentIndex = 0;
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            
+            prepareShuffledQuestions();
+            
+            document.getElementById("quiz-screen").classList.remove("hidden");
+            document.getElementById("results-screen").classList.add("hidden");
+            
+            renderQuestion();
+            
+            console.log("%cQuizzy Pro • Unit 7: Multimedia Design restarted with fresh random order!", "color:#c084fc; font-weight:600");
+        }
+
+        function handleKeyboard(e) {
+            if (!document.getElementById("results-screen").classList.contains("hidden")) return;
+            
+            if (e.key === "ArrowRight") nextQuestion();
+            if (e.key === "ArrowLeft") prevQuestion();
+            if (e.key >= "1" && e.key <= "4" && !isAnswered[currentIndex]) {
+                selectOption(parseInt(e.key) - 1);
+            }
+        }
+
+        function startQuiz() {
+            prepareShuffledQuestions();
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            currentIndex = 0;
+            
+            renderQuestion();
+            document.addEventListener("keydown", handleKeyboard);
+            
+            console.log("%c✅ Quizzy Pro • Unit 7: Multimedia Design loaded successfully! (30 MCQs from official PDF)", "color:#c084fc; font-family:monospace; font-size:13px");
+        }
+
+        window.onload = function() {
+            startQuiz();
+        };
+    </script>
+</body>
+</html>
