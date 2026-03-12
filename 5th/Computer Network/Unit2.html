@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzy Pro • Unit 2: The Physical Layer (30 MCQs)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap');
+        
+        :root {
+            --primary: 103 232 249;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .title-font {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .option-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgb(103 232 249 / 0.3);
+        }
+        
+        .option-btn.selected-correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .option-btn.selected-wrong {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .option-btn.correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .progress-bar {
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal {
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .question-card {
+            animation: fadeSlide 0.4s ease forwards;
+        }
+        
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+    <div class="max-w-3xl mx-auto">
+        <!-- HEADER -->
+        <header class="bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-2xl">
+            <div class="px-6 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-x-4">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center text-4xl shadow-inner">
+                        📡
+                    </div>
+                    <div>
+                        <h1 class="title-font text-3xl font-semibold tracking-tighter">Quizzy Pro</h1>
+                        <p class="text-cyan-100 text-sm font-medium -mt-1">Unit 2: The Physical Layer (30 MCQs)</p>
+                    </div>
+                </div>
+                <div onclick="restartQuiz()" 
+                     class="flex items-center gap-x-2 bg-white/20 hover:bg-white/30 transition-colors px-5 py-2.5 rounded-3xl text-sm font-semibold cursor-pointer">
+                    <i class="fas fa-redo"></i>
+                    <span>Restart</span>
+                </div>
+            </div>
+            
+            <!-- PROGRESS -->
+            <div class="h-2 bg-black/30 relative">
+                <div id="progress-bar" 
+                     class="progress-bar h-2 bg-white rounded-r-full w-0"></div>
+            </div>
+        </header>
+
+        <!-- QUIZ CONTAINER -->
+        <div id="quiz-screen" class="p-6">
+            <div class="flex justify-center items-center mb-8">
+                <div class="px-5 py-1.5 bg-zinc-900 rounded-3xl text-sm font-mono font-medium text-cyan-400" id="question-counter">1 / 30</div>
+            </div>
+
+            <!-- QUESTION -->
+            <div id="question-card" class="question-card bg-zinc-900 rounded-3xl p-8 shadow-2xl border border-zinc-800">
+                <p id="question-text" class="text-2xl leading-tight font-medium text-white"></p>
+                
+                <!-- OPTIONS -->
+                <div id="options-container" class="mt-10 space-y-4"></div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="flex gap-4 mt-10">
+                <button onclick="prevQuestion()" 
+                        id="btn-prev"
+                        class="flex-1 bg-zinc-900 hover:bg-zinc-800 transition-colors text-white font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3 shadow-inner">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Previous</span>
+                </button>
+                
+                <button onclick="nextQuestion()" 
+                        id="btn-next"
+                        class="flex-1 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 transition-all font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3 shadow-lg shadow-cyan-500/30">
+                    <span id="next-text">Next</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="results-screen" class="hidden p-6">
+            <div class="bg-zinc-900 rounded-3xl p-10 text-center">
+                <div id="trophy" class="mx-auto w-32 h-32 flex items-center justify-center text-8xl mb-6"></div>
+                
+                <h2 class="text-6xl font-bold text-white mb-1" id="score">92</h2>
+                <p class="text-cyan-400 text-2xl font-semibold">Score • <span id="percentage">92</span>%</p>
+                
+                <div class="grid grid-cols-3 gap-6 mt-12">
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-emerald-400">
+                            <i class="fas fa-check-circle text-3xl"></i>
+                        </div>
+                        <div id="correct-count" class="text-5xl font-bold mt-4 text-white">28</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">CORRECT</div>
+                    </div>
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-red-400">
+                            <i class="fas fa-times-circle text-3xl"></i>
+                        </div>
+                        <div id="incorrect-count" class="text-5xl font-bold mt-4 text-white">1</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">INCORRECT</div>
+                    </div>
+                    <div class="bg-zinc-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-center gap-x-3 text-amber-400">
+                            <i class="fas fa-forward text-3xl"></i>
+                        </div>
+                        <div id="skipped-count" class="text-5xl font-bold mt-4 text-white">1</div>
+                        <div class="text-zinc-400 text-sm font-medium mt-1">SKIPPED</div>
+                    </div>
+                </div>
+
+                <div class="mt-10 bg-zinc-800/70 rounded-3xl p-8 text-left">
+                    <p id="insight-text" class="text-zinc-300 leading-relaxed text-lg"></p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 mt-12">
+                    <button onclick="showReviewModal()" 
+                            class="flex-1 py-6 bg-white text-zinc-900 rounded-3xl font-semibold flex items-center justify-center gap-x-3 hover:scale-105 transition-transform">
+                        <i class="fas fa-list-check"></i>
+                        REVIEW ALL ANSWERS
+                    </button>
+                    
+                    <button onclick="shareResults()" 
+                            class="flex-1 py-6 bg-zinc-800 hover:bg-zinc-700 rounded-3xl font-semibold flex items-center justify-center gap-x-3 transition-colors">
+                        <i class="fas fa-share-nodes"></i>
+                        SHARE RESULT
+                    </button>
+                </div>
+                
+                <button onclick="restartQuiz()" 
+                        class="mt-6 w-full py-5 text-cyan-400 font-medium flex items-center justify-center gap-x-2 hover:text-cyan-300">
+                    <i class="fas fa-rotate"></i>
+                    <span>Restart Quiz</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REVIEW MODAL -->
+    <div id="review-modal" onclick="if(event.target.id==='review-modal')hideReviewModal()" 
+         class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="modal bg-zinc-900 w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col">
+            <div class="px-8 py-6 border-b border-zinc-700 flex items-center justify-between">
+                <div class="font-semibold text-xl">Review All Answers</div>
+                <button onclick="hideReviewModal()" 
+                        class="w-9 h-9 flex items-center justify-center text-3xl leading-none text-zinc-400 hover:text-white">×</button>
+            </div>
+            
+            <div id="review-list" class="flex-1 overflow-auto p-6 space-y-8"></div>
+            
+            <div class="p-6 border-t border-zinc-700">
+                <button onclick="hideReviewModal()" 
+                        class="w-full py-5 bg-cyan-500 hover:bg-cyan-400 transition-colors rounded-3xl text-white font-semibold">
+                    Close Review
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================== ORIGINAL QUESTIONS (30 MCQs with tricky balanced options) ======================
+        const originalQuestions = [
+            {
+                question: "Which layer of the OSI model handles the physical connection and raw bit transmission?",
+                options: [
+                    "Data Link Layer – responsible for framing and error detection",
+                    "Physical Layer – lowest layer dealing with mechanical/electrical specs and bit streams",
+                    "Network Layer – handles logical addressing and routing",
+                    "Transport Layer – provides end-to-end reliability and flow control"
+                ],
+                correctAnswer: "Physical Layer – lowest layer dealing with mechanical/electrical specs and bit streams"
+            },
+            {
+                question: "What does the scope of the Physical Layer specifically define?",
+                options: [
+                    "Session establishment and termination procedures",
+                    "Mechanical, electrical, functional, and procedural specifications for the physical link",
+                    "Logical IP addressing and packet routing algorithms",
+                    "Application-level data formatting and encryption"
+                ],
+                correctAnswer: "Mechanical, electrical, functional, and procedural specifications for the physical link"
+            },
+            {
+                question: "Which function of the Physical Layer involves converting frames into electrical/optical signals?",
+                options: [
+                    "Bit synchronization using clock recovery",
+                    "Data encoding and signaling (converting frames to bit streams and signals)",
+                    "Logical routing across multiple networks",
+                    "End-to-end segment delivery with TCP"
+                ],
+                correctAnswer: "Data encoding and signaling (converting frames to bit streams and signals)"
+            },
+            {
+                question: "What is the main purpose of bit synchronization at the Physical Layer?",
+                options: [
+                    "To detect and correct transmission errors",
+                    "To ensure sender and receiver clocks match for accurate bit timing",
+                    "To establish virtual circuits before data transfer",
+                    "To compress data for efficient transmission"
+                ],
+                correctAnswer: "To ensure sender and receiver clocks match for accurate bit timing"
+            },
+            {
+                question: "Which is a reception function performed by the Physical Layer?",
+                options: [
+                    "Routing packets based on IP addresses",
+                    "Decoding signals into bits and passing them to the Data Link Layer",
+                    "Managing session checkpoints and recovery",
+                    "Encrypting data using SSL/TLS"
+                ],
+                correctAnswer: "Decoding signals into bits and passing them to the Data Link Layer"
+            },
+            {
+                question: "Important characteristic of the Physical Layer regarding errors?",
+                options: [
+                    "It performs full error correction using CRC",
+                    "It only detects errors but never corrects them (higher layers handle correction)",
+                    "It encrypts data to prevent errors",
+                    "It compresses data to reduce error probability"
+                ],
+                correctAnswer: "It only detects errors but never corrects them (higher layers handle correction)"
+            },
+            {
+                question: "Which service does the Physical Layer provide to the Data Link Layer?",
+                options: [
+                    "Logical addressing and routing",
+                    "Physical connection establishment and raw bit transmission service",
+                    "Session synchronization and checkpoints",
+                    "Application interface for user programs"
+                ],
+                correctAnswer: "Physical connection establishment and raw bit transmission service"
+            },
+            {
+                question: "How does an analog signal differ from a digital signal in terms of waveform?",
+                options: [
+                    "Discrete square waves with only two voltage levels",
+                    "Continuous smooth waveform representing infinite values",
+                    "Fixed amplitude pulses with no variation",
+                    "Binary on/off states without frequency"
+                ],
+                correctAnswer: "Continuous smooth waveform representing infinite values"
+            },
+            {
+                question: "Which signal type offers better noise immunity in transmission?",
+                options: [
+                    "Analog signals (noise accumulates over distance)",
+                    "Digital signals (noise can be easily filtered and regenerated)",
+                    "Both have equal immunity",
+                    "Infrared signals only"
+                ],
+                correctAnswer: "Digital signals (noise can be easily filtered and regenerated)"
+            },
+            {
+                question: "What causes attenuation during signal transmission?",
+                options: [
+                    "Different frequencies arriving at different times",
+                    "Loss of signal strength over distance due to resistance and absorption",
+                    "Sudden external spikes from lightning",
+                    "Interference between adjacent wires"
+                ],
+                correctAnswer: "Loss of signal strength over distance due to resistance and absorption"
+            },
+            {
+                question: "What is the effect of distortion on a transmitted signal?",
+                options: [
+                    "Complete loss of signal energy",
+                    "Change in shape because frequency components travel at different speeds",
+                    "Random unwanted signals added to the original",
+                    "Sudden short-duration spikes"
+                ],
+                correctAnswer: "Change in shape because frequency components travel at different speeds"
+            },
+            {
+                question: "Which type of noise is always present due to electron movement?",
+                options: [
+                    "Impulse noise from external motors",
+                    "Thermal noise caused by random electron motion in conductors",
+                    "Crosstalk between parallel wires",
+                    "Distorted frequency noise"
+                ],
+                correctAnswer: "Thermal noise caused by random electron motion in conductors"
+            },
+            {
+                question: "According to the Nyquist theorem for a noiseless channel, the maximum data rate is?",
+                options: [
+                    "Bandwidth × log₂(1 + SNR)",
+                    "2 × Bandwidth × log₂(number of signal levels)",
+                    "Distance divided by propagation speed",
+                    "Message size divided by bandwidth"
+                ],
+                correctAnswer: "2 × Bandwidth × log₂(number of signal levels)"
+            },
+            {
+                question: "Shannon’s theorem accounts for real-world channels by including which factor?",
+                options: [
+                    "Number of discrete signal levels",
+                    "Signal-to-noise ratio (SNR) in the formula Bandwidth × log₂(1 + SNR)",
+                    "Propagation velocity of the medium",
+                    "Number of guard bands in FDM"
+                ],
+                correctAnswer: "Signal-to-noise ratio (SNR) in the formula Bandwidth × log₂(1 + SNR)"
+            },
+            {
+                question: "What is the key difference between bandwidth and throughput?",
+                options: [
+                    "Bandwidth is actual achieved rate; throughput is theoretical maximum",
+                    "Bandwidth is the theoretical maximum; throughput is the actual measured rate",
+                    "Both are the same in practice",
+                    "Bandwidth measures latency only"
+                ],
+                correctAnswer: "Bandwidth is the theoretical maximum; throughput is the actual measured rate"
+            },
+            {
+                question: "What does latency (propagation delay) specifically measure?",
+                options: [
+                    "Actual bits successfully delivered per second",
+                    "Time taken for the first bit to travel from sender to receiver",
+                    "Total time including queuing and transmission",
+                    "Number of cycles per second"
+                ],
+                correctAnswer: "Time taken for the first bit to travel from sender to receiver"
+            },
+            {
+                question: "Which guided medium uses twisted copper wires to reduce crosstalk?",
+                options: [
+                    "Coaxial cable with braided shielding",
+                    "Twisted-pair cable (UTP or STP)",
+                    "Fiber optic glass strands",
+                    "Satellite microwave links"
+                ],
+                correctAnswer: "Twisted-pair cable (UTP or STP)"
+            },
+            {
+                question: "What is a major advantage of fiber optic cable over copper media?",
+                options: [
+                    "Very low cost and easy installation",
+                    "Extremely high bandwidth, immune to EMI, and very low attenuation",
+                    "Short-range line-of-sight only",
+                    "Susceptible to crosstalk and easy to tap"
+                ],
+                correctAnswer: "Extremely high bandwidth, immune to EMI, and very low attenuation"
+            },
+            {
+                question: "Which unguided medium is omnidirectional and can penetrate walls?",
+                options: [
+                    "Microwaves (line-of-sight only)",
+                    "Radio waves (3 kHz–1 GHz)",
+                    "Infrared (cannot penetrate walls)",
+                    "Fiber optic light pulses"
+                ],
+                correctAnswer: "Radio waves (3 kHz–1 GHz)"
+            },
+            {
+                question: "What technique in spread spectrum replaces each data bit with multiple chips?",
+                options: [
+                    "Frequency hopping (FHSS)",
+                    "Direct sequence spread spectrum (DSSS)",
+                    "Frequency division multiplexing",
+                    "Statistical time division multiplexing"
+                ],
+                correctAnswer: "Direct sequence spread spectrum (DSSS)"
+            },
+            {
+                question: "In circuit switching, what resource is reserved for the entire session?",
+                options: [
+                    "Individual packets only",
+                    "Dedicated path and bandwidth along the entire route",
+                    "Dynamic time slots based on demand",
+                    "Complete message storage at intermediate nodes"
+                ],
+                correctAnswer: "Dedicated path and bandwidth along the entire route"
+            },
+            {
+                question: "Which packet switching approach routes each packet independently?",
+                options: [
+                    "Virtual circuit approach",
+                    "Datagram approach (connectionless)",
+                    "Circuit switching with fixed path",
+                    "Message switching with full storage"
+                ],
+                correctAnswer: "Datagram approach (connectionless)"
+            },
+            {
+                question: "What is the main characteristic of message switching?",
+                options: [
+                    "Dedicated path with resource reservation",
+                    "Entire message is stored and forwarded as one unit",
+                    "Packets travel different routes independently",
+                    "Fixed time slots for each connection"
+                ],
+                correctAnswer: "Entire message is stored and forwarded as one unit"
+            },
+            {
+                question: "Which access technology converts digital data to analog for use over voice lines?",
+                options: [
+                    "DSL using frequencies above voice band",
+                    "Dial-up modem (up to 56 Kbps)",
+                    "Cable modem over coaxial TV cable",
+                    "Fiber to the home (FTTH)"
+                ],
+                correctAnswer: "Dial-up modem (up to 56 Kbps)"
+            },
+            {
+                question: "What does ADSL stand for and its key feature?",
+                options: [
+                    "Symmetric DSL with equal upload/download",
+                    "Asymmetric DSL – download speed much higher than upload",
+                    "Always-on satellite link",
+                    "Mobile 5G ultra-low latency"
+                ],
+                correctAnswer: "Asymmetric DSL – download speed much higher than upload"
+            },
+            {
+                question: "A major disadvantage of cable modem technology compared to DSL is?",
+                options: [
+                    "Cannot use existing infrastructure",
+                    "Shared neighborhood bandwidth leading to congestion",
+                    "Requires new fiber installation",
+                    "Very low maximum speed"
+                ],
+                correctAnswer: "Shared neighborhood bandwidth leading to congestion"
+            },
+            {
+                question: "Which generation of mobile networks introduced all-IP architecture and high-speed broadband?",
+                options: [
+                    "2G (GSM/CDMA)",
+                    "4G/LTE",
+                    "1G analog voice only",
+                    "3G basic data"
+                ],
+                correctAnswer: "4G/LTE"
+            },
+            {
+                question: "What technology brings fiber optic cable directly to the user’s home?",
+                options: [
+                    "DSL over copper telephone lines",
+                    "FTTH (Fiber to the Home)",
+                    "Cable modem over coaxial",
+                    "Dial-up modem"
+                ],
+                correctAnswer: "FTTH (Fiber to the Home)"
+            },
+            {
+                question: "In the comparison of access technologies, which has the highest typical speed and is dedicated?",
+                options: [
+                    "Dial-up modem (56 Kbps)",
+                    "FTTH – 100 Mbps to 1 Gbps, dedicated fiber",
+                    "Mobile 4G (shared radio)",
+                    "Cable modem (shared coaxial)"
+                ],
+                correctAnswer: "FTTH – 100 Mbps to 1 Gbps, dedicated fiber"
+            },
+            {
+                question: "Which multiplexing technique divides the channel by time slots and wastes empty slots in synchronous mode?",
+                options: [
+                    "Frequency Division Multiplexing (FDM)",
+                    "Time Division Multiplexing (TDM)",
+                    "Wavelength Division Multiplexing (WDM)",
+                    "Statistical TDM with dynamic allocation"
+                ],
+                correctAnswer: "Time Division Multiplexing (TDM)"
+            }
+        ];
+
+        // ====================== QUIZ STATE & FUNCTIONS (unchanged) ======================
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = [];
+        let isAnswered = [];
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function prepareShuffledQuestions() {
+            shuffledQuestions = originalQuestions.map(q => {
+                const shuffledOpts = shuffleArray(q.options);
+                const correctIndex = shuffledOpts.indexOf(q.correctAnswer);
+                return {
+                    question: q.question,
+                    options: shuffledOpts,
+                    correctIndex: correctIndex
+                };
+            });
+        }
+
+        function renderQuestion() {
+            const q = shuffledQuestions[currentIndex];
+            document.getElementById("question-counter").textContent = `${currentIndex + 1} / 30`;
+            document.getElementById("question-text").textContent = q.question;
+            
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+            const labels = ["A", "B", "C", "D"];
+            
+            q.options.forEach((option, idx) => {
+                const btn = document.createElement("button");
+                btn.className = `option-btn w-full text-left px-7 py-6 rounded-3xl border-2 border-zinc-700 bg-zinc-800 hover:border-cyan-400 transition-all flex items-start gap-4 group`;
+                btn.innerHTML = `
+                    <span class="w-8 h-8 flex-shrink-0 rounded-2xl bg-zinc-700 text-cyan-400 font-bold flex items-center justify-center text-lg transition-colors group-hover:bg-cyan-400 group-hover:text-white">${labels[idx]}</span>
+                    <span class="text-lg leading-tight">${option}</span>
+                `;
+                btn.onclick = () => selectOption(idx);
+                container.appendChild(btn);
+            });
+            
+            updateProgress();
+            updateNavigation();
+            if (isAnswered[currentIndex]) showFeedback();
+        }
+
+        function selectOption(selectedIdx) {
+            if (isAnswered[currentIndex]) return;
+            isAnswered[currentIndex] = true;
+            userAnswers[currentIndex] = selectedIdx;
+            showFeedback();
+            updateNavigation();
+        }
+
+        function showFeedback() {
+            const q = shuffledQuestions[currentIndex];
+            const container = document.getElementById("options-container");
+            const buttons = container.children;
+            const userChoice = userAnswers[currentIndex];
+            
+            for (let i = 0; i < buttons.length; i++) {
+                const btn = buttons[i];
+                if (i === q.correctIndex) {
+                    btn.classList.add("correct");
+                    btn.innerHTML += `<span class="ml-auto text-white text-2xl">✓</span>`;
+                }
+                if (i === userChoice) {
+                    if (userChoice === q.correctIndex) {
+                        btn.classList.add("selected-correct");
+                    } else {
+                        btn.classList.add("selected-wrong");
+                        btn.innerHTML += `<span class="ml-auto text-white text-2xl">✕</span>`;
+                    }
+                }
+                btn.onclick = null;
+                btn.style.cursor = "default";
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / 30) * 100;
+            document.getElementById("progress-bar").style.width = `${progress}%`;
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById("btn-prev");
+            const nextText = document.getElementById("next-text");
+            prevBtn.disabled = currentIndex === 0;
+            prevBtn.style.opacity = currentIndex === 0 ? "0.4" : "1";
+            nextText.textContent = currentIndex === 29 ? "Finish Quiz" : "Next";
+        }
+
+        function nextQuestion() {
+            if (currentIndex < 29) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function calculateResults() {
+            let correct = 0, incorrect = 0, skipped = 0;
+            for (let i = 0; i < 30; i++) {
+                if (!isAnswered[i]) skipped++;
+                else if (userAnswers[i] === shuffledQuestions[i].correctIndex) correct++;
+                else incorrect++;
+            }
+            const percentage = Math.round((correct / 30) * 100);
+            return { correct, incorrect, skipped, percentage };
+        }
+
+        function showResults() {
+            document.getElementById("quiz-screen").classList.add("hidden");
+            const resultsScreen = document.getElementById("results-screen");
+            resultsScreen.classList.remove("hidden");
+            
+            const stats = calculateResults();
+            document.getElementById("score").textContent = stats.correct;
+            document.getElementById("percentage").textContent = stats.percentage;
+            document.getElementById("correct-count").textContent = stats.correct;
+            document.getElementById("incorrect-count").textContent = stats.incorrect;
+            document.getElementById("skipped-count").textContent = stats.skipped;
+            
+            const trophyEl = document.getElementById("trophy");
+            trophyEl.innerHTML = stats.percentage >= 80 ? "🏆" : stats.percentage >= 60 ? "🎉" : "📡";
+            
+            let insight = stats.percentage >= 90 ? "Outstanding! You mastered every detail of signals, impairments, media, multiplexing, and switching." :
+                          stats.percentage >= 75 ? "Excellent! Strong command of Physical Layer functions and performance metrics." :
+                          stats.percentage >= 60 ? "Good effort! Review Nyquist/Shannon, media types, and switching techniques." :
+                          "Keep studying the Physical Layer – focus on tricky concepts like impairments and multiplexing.";
+            document.getElementById("insight-text").innerHTML = insight;
+        }
+
+        function showReviewModal() {
+            const modal = document.getElementById("review-modal");
+            const list = document.getElementById("review-list");
+            list.innerHTML = "";
+            
+            shuffledQuestions.forEach((q, i) => {
+                const answered = isAnswered[i];
+                const userIdx = userAnswers[i];
+                const isCorrect = answered && (userIdx === q.correctIndex);
+                
+                const div = document.createElement("div");
+                div.className = "border border-zinc-700 rounded-3xl p-6";
+                div.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-x-3">
+                                <span class="font-mono text-xs bg-zinc-800 px-3 py-1 rounded-2xl">${i+1}</span>
+                                <p class="font-medium text-white leading-tight">${q.question}</p>
+                            </div>
+                            <div class="mt-6 grid grid-cols-1 gap-4">
+                                ${q.options.map((opt, idx) => {
+                                    let statusHTML = "";
+                                    if (answered && idx === userIdx) {
+                                        statusHTML = isCorrect ? `<span class="text-emerald-400 text-xs font-bold">YOUR ANSWER ✓</span>` : `<span class="text-red-400 text-xs font-bold">YOUR ANSWER ✕</span>`;
+                                    }
+                                    if (idx === q.correctIndex) statusHTML += ` <span class="text-emerald-400 text-xs font-bold">CORRECT</span>`;
+                                    return `
+                                        <div class="flex justify-between items-center ${idx === q.correctIndex ? 'text-emerald-400' : 'text-zinc-300'}">
+                                            <span>${String.fromCharCode(65 + idx)}. ${opt}</span>
+                                            ${statusHTML}
+                                        </div>
+                                    `;
+                                }).join("")}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function hideReviewModal() {
+            const modal = document.getElementById("review-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function shareResults() {
+            const stats = calculateResults();
+            const text = `📡 I just scored ${stats.percentage}% on Quizzy Pro • Unit 2: The Physical Layer!\n\n✅ Correct: ${stats.correct}\n❌ Incorrect: ${stats.incorrect}\n⏭️ Skipped: ${stats.skipped}\n\nTest your knowledge of signals, media & switching!`;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.currentTarget;
+                const orig = btn.innerHTML;
+                btn.innerHTML = `<i class="fas fa-check"></i> COPIED!`;
+                setTimeout(() => btn.innerHTML = orig, 2000);
+            });
+        }
+
+        function restartQuiz() {
+            currentIndex = 0;
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            prepareShuffledQuestions();
+            document.getElementById("quiz-screen").classList.remove("hidden");
+            document.getElementById("results-screen").classList.add("hidden");
+            renderQuestion();
+            console.log("%cQuizzy Pro • Unit 2: The Physical Layer restarted with fresh random order!", "color:#67e8f9; font-weight:600");
+        }
+
+        function handleKeyboard(e) {
+            if (!document.getElementById("results-screen").classList.contains("hidden")) return;
+            if (e.key === "ArrowRight") nextQuestion();
+            if (e.key === "ArrowLeft") prevQuestion();
+            if (e.key >= "1" && e.key <= "4" && !isAnswered[currentIndex]) {
+                selectOption(parseInt(e.key) - 1);
+            }
+        }
+
+        function startQuiz() {
+            prepareShuffledQuestions();
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            currentIndex = 0;
+            renderQuestion();
+            document.addEventListener("keydown", handleKeyboard);
+            console.log("%c✅ Quizzy Pro • Unit 2: The Physical Layer loaded successfully! (30 tricky MCQs from official PDF)", "color:#67e8f9; font-family:monospace; font-size:13px");
+        }
+
+        window.onload = startQuiz;
+    </script>
+</body>
+</html>
