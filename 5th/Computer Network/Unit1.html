@@ -91,12 +91,10 @@
                         <p class="text-cyan-100 text-sm font-medium -mt-1">Unit 1: Introduction to Computer Networks (30 MCQs)</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-x-3">
-                    <div onclick="restartQuiz()" 
-                         class="flex items-center gap-x-2 bg-white/20 hover:bg-white/30 transition-colors px-5 py-2.5 rounded-3xl text-sm font-semibold cursor-pointer">
-                        <i class="fas fa-redo"></i>
-                        <span>Restart</span>
-                    </div>
+                <div onclick="restartQuiz()" 
+                     class="flex items-center gap-x-2 bg-white/20 hover:bg-white/30 transition-colors px-5 py-2.5 rounded-3xl text-sm font-semibold cursor-pointer">
+                    <i class="fas fa-redo"></i>
+                    <span>Restart</span>
                 </div>
             </div>
             
@@ -109,10 +107,8 @@
 
         <!-- QUIZ CONTAINER -->
         <div id="quiz-screen" class="p-6">
-            <div class="flex justify-between items-center mb-8">
-                <div class="flex items-center gap-x-3">
-                    <div class="px-5 py-1.5 bg-zinc-900 rounded-3xl text-sm font-mono font-medium text-cyan-400" id="question-counter">1 / 30</div>
-                </div>
+            <div class="flex justify-center items-center mb-8">
+                <div class="px-5 py-1.5 bg-zinc-900 rounded-3xl text-sm font-mono font-medium text-cyan-400" id="question-counter">1 / 30</div>
             </div>
 
             <!-- QUESTION -->
@@ -144,7 +140,6 @@
         <!-- RESULTS SCREEN -->
         <div id="results-screen" class="hidden p-6">
             <div class="bg-zinc-900 rounded-3xl p-10 text-center">
-                <!-- Trophy -->
                 <div id="trophy" class="mx-auto w-32 h-32 flex items-center justify-center text-8xl mb-6"></div>
                 
                 <h2 class="text-6xl font-bold text-white mb-1" id="score">92</h2>
@@ -174,12 +169,10 @@
                     </div>
                 </div>
 
-                <!-- Insight -->
                 <div class="mt-10 bg-zinc-800/70 rounded-3xl p-8 text-left">
                     <p id="insight-text" class="text-zinc-300 leading-relaxed text-lg"></p>
                 </div>
 
-                <!-- Actions -->
                 <div class="flex flex-col sm:flex-row gap-4 mt-12">
                     <button onclick="showReviewModal()" 
                             class="flex-1 py-6 bg-white text-zinc-900 rounded-3xl font-semibold flex items-center justify-center gap-x-3 hover:scale-105 transition-transform">
@@ -208,18 +201,13 @@
          class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div onclick="event.stopImmediatePropagation()" 
              class="modal bg-zinc-900 w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col">
-            
-            <!-- Modal Header -->
             <div class="px-8 py-6 border-b border-zinc-700 flex items-center justify-between">
                 <div class="font-semibold text-xl">Review All Answers</div>
                 <button onclick="hideReviewModal()" 
                         class="w-9 h-9 flex items-center justify-center text-3xl leading-none text-zinc-400 hover:text-white">×</button>
             </div>
             
-            <!-- Content -->
-            <div id="review-list" class="flex-1 overflow-auto p-6 space-y-8">
-                <!-- JS injected -->
-            </div>
+            <div id="review-list" class="flex-1 overflow-auto p-6 space-y-8"></div>
             
             <div class="p-6 border-t border-zinc-700">
                 <button onclick="hideReviewModal()" 
@@ -231,300 +219,280 @@
     </div>
 
     <script>
-        // ====================== ORIGINAL QUESTIONS (30 exact from PDF) ======================
+        // ====================== ORIGINAL QUESTIONS (30 MCQs with tricky balanced options) ======================
         const originalQuestions = [
             {
-                question: "What is the definition of a computer network?",
+                question: "A computer network is best defined as",
                 options: [
-                    "A single computer connected to the internet",
-                    "An infrastructure that connects two or more computers and devices (nodes) together to facilitate data communication and resource sharing",
-                    "Only wireless devices communicating",
-                    "A collection of cables only"
+                    "A collection of standalone computers for local storage",
+                    "An infrastructure connecting nodes for data communication and resource sharing",
+                    "Only wireless devices used for gaming",
+                    "A single server managing all printers"
                 ],
-                correctAnswer: "An infrastructure that connects two or more computers and devices (nodes) together to facilitate data communication and resource sharing"
+                correctAnswer: "An infrastructure connecting nodes for data communication and resource sharing"
             },
             {
-                question: "What is the purpose of a computer network, as compared to a highway system?",
+                question: "The main purpose of a computer network is similar to",
                 options: [
-                    "To store data permanently",
-                    "It provides the foundational pathway for data to travel from sender to receiver",
-                    "To print documents",
-                    "To play games only"
+                    "A local hard drive for backups",
+                    "A highway system providing a pathway for data from sender to receiver",
+                    "A single application for video editing",
+                    "A router used only for internet access"
                 ],
-                correctAnswer: "It provides the foundational pathway for data to travel from sender to receiver"
+                correctAnswer: "A highway system providing a pathway for data from sender to receiver"
             },
             {
-                question: "Which is a hardware component of the network infrastructure?",
+                question: "Hardware components of network infrastructure include",
                 options: [
-                    "Protocols only",
-                    "NIC (wired/wireless), cables, switches, routers",
-                    "Email applications",
-                    "Social media platforms"
+                    "Protocols and operating systems only",
+                    "NICs, cables, switches, and routers",
+                    "Email servers and social media apps",
+                    "Database software exclusively"
                 ],
-                correctAnswer: "NIC (wired/wireless), cables, switches, routers"
+                correctAnswer: "NICs, cables, switches, and routers"
             },
             {
-                question: "Which is a software component of the network infrastructure?",
+                question: "Software components of a network primarily consist of",
                 options: [
-                    "Cables and routers",
+                    "Physical cables and connectors",
                     "Protocols and network operating systems",
-                    "Physical hard drives",
-                    "Printers"
+                    "Printers and scanners",
+                    "Fiber optic cables only"
                 ],
                 correctAnswer: "Protocols and network operating systems"
             },
             {
-                question: "What are transmission media in a computer network?",
+                question: "Transmission media in a network refer to",
                 options: [
-                    "Only software rules",
-                    "The physical path (guided like cables, unguided like radio waves)",
-                    "User applications",
-                    "Central servers only"
+                    "Software rules for data formatting",
+                    "The physical path (guided cables or unguided radio waves)",
+                    "Centralized backup servers",
+                    "Application-level encryption tools"
                 ],
-                correctAnswer: "The physical path (guided like cables, unguided like radio waves)"
+                correctAnswer: "The physical path (guided cables or unguided radio waves)"
             },
             {
-                question: "What is the function of a computer network?",
+                question: "The core function of a computer network is to",
                 options: [
-                    "Only to play online games",
-                    "It governs how data is formatted, addressed, transmitted, and received, ensuring all devices can communicate effectively",
-                    "To store movies only",
-                    "To design websites"
+                    "Store all data locally on each device",
+                    "Govern formatting, addressing, transmission, and reception of data",
+                    "Replace all physical hardware",
+                    "Limit access to only one user"
                 ],
-                correctAnswer: "It governs how data is formatted, addressed, transmitted, and received, ensuring all devices can communicate effectively"
+                correctAnswer: "Govern formatting, addressing, transmission, and reception of data"
             },
             {
-                question: "Which is a Business Application of computer networks?",
+                question: "Resource sharing in business applications of networks means",
                 options: [
-                    "Streaming Netflix",
-                    "Resource Sharing: Sharing hardware (printers, scanners) and software across an organization",
-                    "Online gaming",
-                    "Social media posting"
+                    "Only video conferencing tools",
+                    "Sharing hardware like printers and software to reduce costs",
+                    "Streaming services for entertainment",
+                    "Online shopping transactions"
                 ],
-                correctAnswer: "Resource Sharing: Sharing hardware (printers, scanners) and software across an organization"
+                correctAnswer: "Sharing hardware like printers and software to reduce costs"
             },
             {
-                question: "Which communication application uses SMTP?",
+                question: "A key communication application using SMTP is",
                 options: [
-                    "Video calls",
-                    "Email (SMTP): Primary mode of professional and personal written communication",
-                    "Online shopping",
-                    "Streaming music"
+                    "Real-time video calls",
+                    "Email as the primary written communication method",
+                    "Digital marketing campaigns",
+                    "Multiplayer online gaming"
                 ],
-                correctAnswer: "Email (SMTP): Primary mode of professional and personal written communication"
+                correctAnswer: "Email as the primary written communication method"
             },
             {
-                question: "Which is an E-commerce Application of computer networks?",
+                question: "E-commerce applications of networks enable",
                 options: [
-                    "Online learning portals",
-                    "Online Transactions: Enabling financial transactions, online banking, and shopping",
-                    "Video conferencing only",
-                    "Resource sharing in offices"
+                    "Centralized data management only",
+                    "Online transactions, banking, and shopping",
+                    "Resource sharing in offices",
+                    "Educational portals exclusively"
                 ],
-                correctAnswer: "Online Transactions: Enabling financial transactions, online banking, and shopping"
+                correctAnswer: "Online transactions, banking, and shopping"
             },
             {
-                question: "Which entertainment application uses platforms like Netflix and YouTube?",
+                question: "Entertainment applications primarily rely on networks for",
                 options: [
-                    "Email communication",
-                    "Streaming Services: On-demand video (Netflix, YouTube) and music (Spotify) streaming",
-                    "Centralized data management",
-                    "LAN in college labs"
+                    "Email and social networking",
+                    "Streaming services like Netflix and online gaming",
+                    "Business resource sharing",
+                    "Centralized server backups"
                 ],
-                correctAnswer: "Streaming Services: On-demand video (Netflix, YouTube) and music (Spotify) streaming"
+                correctAnswer: "Streaming services like Netflix and online gaming"
             },
             {
-                question: "Which is an Educational Application of computer networks?",
+                question: "Educational applications of networks include",
                 options: [
-                    "Online gaming",
-                    "Online learning platforms (Coursera, TU e-Learning portal), virtual classrooms, and access to digital libraries",
-                    "VoIP calls",
-                    "Digital marketing"
+                    "Online gaming platforms",
+                    "Learning portals, virtual classrooms, and digital libraries",
+                    "Cable TV distribution",
+                    "VoIP voice calls only"
                 ],
-                correctAnswer: "Online learning platforms (Coursera, TU e-Learning portal), virtual classrooms, and access to digital libraries"
+                correctAnswer: "Learning portals, virtual classrooms, and digital libraries"
             },
             {
-                question: "What is the concept of Client-Server Architecture?",
+                question: "In client-server architecture, the central device",
                 options: [
-                    "All devices are equal with no central server",
-                    "A central, powerful server provides services and multiple clients request these services",
-                    "Only peer-to-peer file sharing",
-                    "Wireless only networks"
+                    "Has equal status with all clients",
+                    "Provides services while clients request them",
+                    "Uses Bluetooth for file sharing",
+                    "Eliminates any single point of failure"
                 ],
-                correctAnswer: "A central, powerful server provides services and multiple clients request these services"
+                correctAnswer: "Provides services while clients request them"
             },
             {
-                question: "Which is the exact Real-World Example given for Client-Server Architecture?",
+                question: "A real-world example of client-server architecture is",
                 options: [
-                    "Bluetooth file sharing between mobiles",
-                    "Accessing the TU exam form portal. Your laptop (client) requests the form from the TU server",
-                    "BitTorrent downloads",
-                    "Home Wi-Fi only"
+                    "BitTorrent file downloads",
+                    "Accessing a university exam portal where laptop requests from server",
+                    "Bluetooth sharing between mobiles",
+                    "Home Wi-Fi without any server"
                 ],
-                correctAnswer: "Accessing the TU exam form portal. Your laptop (client) requests the form from the TU server"
+                correctAnswer: "Accessing a university exam portal where laptop requests from server"
             },
             {
-                question: "What is an advantage of Client-Server Architecture?",
+                question: "A major advantage of client-server architecture is",
                 options: [
                     "No single point of failure",
-                    "Centralized management, better security, high performance",
-                    "Inexpensive setup",
-                    "Decentralized management"
+                    "Centralized management, security, and high performance",
+                    "Low setup cost",
+                    "Decentralized control"
                 ],
-                correctAnswer: "Centralized management, better security, high performance"
+                correctAnswer: "Centralized management, security, and high performance"
             },
             {
-                question: "What is the concept of Peer-to-Peer (P2P) Architecture?",
+                question: "Peer-to-peer architecture means all devices",
                 options: [
-                    "Central server provides all services",
-                    "All devices have equal status and can both request and provide services. There is no central server",
-                    "Only used for email",
-                    "High cost infrastructure"
+                    "Depend on a powerful central server",
+                    "Have equal status and can both request and provide services",
+                    "Use only leased lines",
+                    "Require dedicated bandwidth reservation"
                 ],
-                correctAnswer: "All devices have equal status and can both request and provide services. There is no central server"
+                correctAnswer: "Have equal status and can both request and provide services"
             },
             {
-                question: "Which is the exact Real-World Example given for P2P Architecture?",
+                question: "A real-world example of peer-to-peer architecture is",
                 options: [
-                    "TU exam portal",
-                    "Sharing files via Bluetooth between two mobiles or using BitTorrent for downloads",
-                    "Netflix streaming",
-                    "Company database servers"
+                    "University exam form portal",
+                    "Bluetooth file sharing or BitTorrent downloads",
+                    "Netflix video streaming",
+                    "Company centralized database"
                 ],
-                correctAnswer: "Sharing files via Bluetooth between two mobiles or using BitTorrent for downloads"
+                correctAnswer: "Bluetooth file sharing or BitTorrent downloads"
             },
             {
-                question: "What is the geographical span of a Local Area Network (LAN)?",
+                question: "Local Area Network (LAN) is characterized by",
                 options: [
-                    "Entire country",
-                    "Small area like a room, building, or campus (typically up to 2 miles)",
-                    "City-wide",
-                    "Global continents"
+                    "Country-wide coverage",
+                    "Small area (room/building/campus) with high speed (100-1000 Mbps)",
+                    "Satellite-based global links",
+                    "City-wide cable TV only"
                 ],
-                correctAnswer: "Small area like a room, building, or campus (typically up to 2 miles)"
+                correctAnswer: "Small area (room/building/campus) with high speed (100-1000 Mbps)"
             },
             {
-                question: "Which is the exact Real-World Example given for LAN?",
+                question: "A typical real-world example of LAN is",
                 options: [
-                    "The Internet",
-                    "Computer lab in your BCA college, a cyber cafe, or a home network",
-                    "Cable TV network in a city",
-                    "Bank branches across Nepal"
+                    "The entire Internet",
+                    "College computer lab, cyber cafe, or home network",
+                    "Bank branches across a country",
+                    "Undersea cable connections"
                 ],
-                correctAnswer: "Computer lab in your BCA college, a cyber cafe, or a home network"
+                correctAnswer: "College computer lab, cyber cafe, or home network"
             },
             {
-                question: "What is the geographical span of a Metropolitan Area Network (MAN)?",
+                question: "Metropolitan Area Network (MAN) covers",
                 options: [
-                    "Small room only",
-                    "Covers a city or town (larger than LAN, smaller than WAN)",
-                    "Global only",
-                    "Single building"
+                    "A single room or building",
+                    "A city or town (larger than LAN, smaller than WAN)",
+                    "Continents using satellites",
+                    "Only wireless radio waves"
                 ],
-                correctAnswer: "Covers a city or town (larger than LAN, smaller than WAN)"
+                correctAnswer: "A city or town (larger than LAN, smaller than WAN)"
             },
             {
-                question: "Which is the exact Real-World Example given for MAN?",
+                question: "A real-world example of MAN is",
                 options: [
-                    "Home Wi-Fi",
-                    "Cable TV network connecting a whole city, or the network connecting different branches of a bank within Kathmandu valley",
+                    "Home Wi-Fi network",
+                    "Cable TV network in a city or bank branches in Kathmandu valley",
                     "International university links",
-                    "Bluetooth pairing"
+                    "Bluetooth between two phones"
                 ],
-                correctAnswer: "Cable TV network connecting a whole city, or the network connecting different branches of a bank within Kathmandu valley"
+                correctAnswer: "Cable TV network in a city or bank branches in Kathmandu valley"
             },
             {
-                question: "What is the geographical span of a Wide Area Network (WAN)?",
+                question: "Wide Area Network (WAN) spans",
                 options: [
-                    "Single building",
-                    "Covers large geographical areas like countries or continents",
-                    "City only",
-                    "Campus only"
+                    "A single campus",
+                    "Large areas like countries or continents",
+                    "Only one building",
+                    "City-wide cable systems"
                 ],
-                correctAnswer: "Covers large geographical areas like countries or continents"
+                correctAnswer: "Large areas like countries or continents"
             },
             {
-                question: "Which is the exact Real-World Example given for WAN?",
+                question: "The largest example of a WAN is",
                 options: [
-                    "College lab network",
-                    "The Internet itself is the largest WAN. Connection between TU Central Library and a university in the USA",
-                    "Home Bluetooth",
-                    "Local cyber cafe"
+                    "A college computer lab",
+                    "The Internet itself",
+                    "Local Bluetooth pairing",
+                    "Home Ethernet setup"
                 ],
-                correctAnswer: "The Internet itself is the largest WAN. Connection between TU Central Library and a university in the USA"
+                correctAnswer: "The Internet itself"
             },
             {
-                question: "What is the definition of Protocols in computer networks?",
+                question: "A protocol in computer networks is defined as",
                 options: [
-                    "Physical cables only",
-                    "A set of rules governing data communication. It defines what, how, and when to communicate",
+                    "Physical cables and connectors",
+                    "A set of rules defining what, how, and when to communicate",
                     "Only email applications",
-                    "Hardware components"
+                    "Hardware interface cards"
                 ],
-                correctAnswer: "A set of rules governing data communication. It defines what, how, and when to communicate"
+                correctAnswer: "A set of rules defining what, how, and when to communicate"
             },
             {
-                question: "What is the 'Syntax' element of a Protocol?",
+                question: "The 'syntax' element of a protocol refers to",
                 options: [
+                    "Meaning of data bits",
+                    "Structure or format of the data (e.g., first 8 bits as address)",
+                    "Timing and speed of transmission",
+                    "Only error detection methods"
+                ],
+                correctAnswer: "Structure or format of the data (e.g., first 8 bits as address)"
+            },
+            {
+                question: "The 'semantics' element of a protocol refers to",
+                options: [
+                    "Data format structure",
                     "Meaning of each section of bits",
-                    "Structure or format of the data (e.g., first 8 bits are sender's address)",
                     "When data should be sent",
-                    "Only timing"
+                    "Physical cable specifications"
                 ],
-                correctAnswer: "Structure or format of the data (e.g., first 8 bits are sender's address)"
+                correctAnswer: "Meaning of each section of bits"
             },
             {
-                question: "What is the 'Semantics' element of a Protocol?",
+                question: "The 'timing' element of a protocol concerns",
                 options: [
-                    "Structure of data",
-                    "Meaning of each section of bits (e.g., what does a specific pattern mean?)",
-                    "Speed of transmission",
-                    "Only hardware"
+                    "Data format only",
+                    "When data should be sent and synchronization speed",
+                    "Meaning of control signals",
+                    "Hardware voltage levels"
                 ],
-                correctAnswer: "Meaning of each section of bits (e.g., what does a specific pattern mean?)"
+                correctAnswer: "When data should be sent and synchronization speed"
             },
             {
-                question: "What is the 'Timing' element of a Protocol?",
+                question: "A de facto standard in networking is one that",
                 options: [
-                    "Format of data",
-                    "When data should be sent and how fast (synchronization and speed matching)",
-                    "Meaning of bits",
-                    "Only physical cables"
+                    "Is officially legislated by ISO",
+                    "Arises from widespread use (e.g., HTTP, Ethernet)",
+                    "Applies only to OSI model",
+                    "Is limited to physical layer"
                 ],
-                correctAnswer: "When data should be sent and how fast (synchronization and speed matching)"
+                correctAnswer: "Arises from widespread use (e.g., HTTP, Ethernet)"
             },
             {
-                question: "Which is the exact Real-World Example given for the protocol of conversation?",
-                options: [
-                    "A person asking 'How are you?' expects a reply about well-being, not their shoe size",
-                    "Ethernet cabling",
-                    "IP addressing",
-                    "HTTP requests"
-                ],
-                correctAnswer: "A person asking 'How are you?' expects a reply about well-being, not their shoe size"
-            },
-            {
-                question: "What is a De Facto Standard?",
-                options: [
-                    "Officially legislated by ISO",
-                    "Standards that have happened by history or widespread use, not officially approved (e.g., HTTP, Ethernet)",
-                    "Only OSI model",
-                    "Physical layer only"
-                ],
-                correctAnswer: "Standards that have happened by history or widespread use, not officially approved (e.g., HTTP, Ethernet)"
-            },
-            {
-                question: "What is a De Jure Standard?",
-                options: [
-                    "Widespread use only",
-                    "Standards legislated by an official recognized body (e.g., OSI model by ISO)",
-                    "Only TCP/IP",
-                    "Bluetooth"
-                ],
-                correctAnswer: "Standards legislated by an official recognized body (e.g., OSI model by ISO)"
-            },
-            {
-                question: "How many layers does the OSI Reference Model have?",
+                question: "The OSI Reference Model has how many layers?",
                 options: [
                     "4 layers",
                     "7 layers",
@@ -534,14 +502,24 @@
                 correctAnswer: "7 layers"
             },
             {
-                question: "What is the PDU (Protocol Data Unit) and a key function of the Physical Layer in the OSI model?",
+                question: "In the OSI model, the bottom layer (Physical) uses which PDU?",
                 options: [
-                    "Frame - Error control",
-                    "Bits - Transmission of raw bit stream over physical medium",
-                    "Packet - Routing",
-                    "Segment - End-to-end connection"
+                    "Frame with MAC addressing",
+                    "Bits for raw bit stream transmission",
+                    "Packet with IP routing",
+                    "Segment with port numbers"
                 ],
-                correctAnswer: "Bits - Transmission of raw bit stream over physical medium"
+                correctAnswer: "Bits for raw bit stream transmission"
+            },
+            {
+                question: "The TCP/IP model differs from OSI mainly in",
+                options: [
+                    "Having more layers",
+                    "Combining upper layers and using 4 practical layers",
+                    "Being purely theoretical",
+                    "Requiring de jure standards only"
+                ],
+                correctAnswer: "Combining upper layers and using 4 practical layers"
             }
         ];
 
@@ -574,13 +552,11 @@
 
         function renderQuestion() {
             const q = shuffledQuestions[currentIndex];
-            
             document.getElementById("question-counter").textContent = `${currentIndex + 1} / 30`;
             document.getElementById("question-text").textContent = q.question;
             
             const container = document.getElementById("options-container");
             container.innerHTML = "";
-            
             const labels = ["A", "B", "C", "D"];
             
             q.options.forEach((option, idx) => {
@@ -590,25 +566,19 @@
                     <span class="w-8 h-8 flex-shrink-0 rounded-2xl bg-zinc-700 text-cyan-400 font-bold flex items-center justify-center text-lg transition-colors group-hover:bg-cyan-400 group-hover:text-white">${labels[idx]}</span>
                     <span class="text-lg leading-tight">${option}</span>
                 `;
-                
                 btn.onclick = () => selectOption(idx);
                 container.appendChild(btn);
             });
             
             updateProgress();
             updateNavigation();
-            
-            if (isAnswered[currentIndex]) {
-                showFeedback();
-            }
+            if (isAnswered[currentIndex]) showFeedback();
         }
 
         function selectOption(selectedIdx) {
             if (isAnswered[currentIndex]) return;
-            
             isAnswered[currentIndex] = true;
             userAnswers[currentIndex] = selectedIdx;
-            
             showFeedback();
             updateNavigation();
         }
@@ -621,12 +591,10 @@
             
             for (let i = 0; i < buttons.length; i++) {
                 const btn = buttons[i];
-                
                 if (i === q.correctIndex) {
                     btn.classList.add("correct");
                     btn.innerHTML += `<span class="ml-auto text-white text-2xl">✓</span>`;
                 }
-                
                 if (i === userChoice) {
                     if (userChoice === q.correctIndex) {
                         btn.classList.add("selected-correct");
@@ -635,7 +603,6 @@
                         btn.innerHTML += `<span class="ml-auto text-white text-2xl">✕</span>`;
                     }
                 }
-                
                 btn.onclick = null;
                 btn.style.cursor = "default";
             }
@@ -648,17 +615,10 @@
 
         function updateNavigation() {
             const prevBtn = document.getElementById("btn-prev");
-            const nextBtn = document.getElementById("btn-next");
             const nextText = document.getElementById("next-text");
-            
             prevBtn.disabled = currentIndex === 0;
             prevBtn.style.opacity = currentIndex === 0 ? "0.4" : "1";
-            
-            if (currentIndex === 29) {
-                nextText.textContent = "Finish Quiz";
-            } else {
-                nextText.textContent = "Next";
-            }
+            nextText.textContent = currentIndex === 29 ? "Finish Quiz" : "Next";
         }
 
         function nextQuestion() {
@@ -678,20 +638,12 @@
         }
 
         function calculateResults() {
-            let correct = 0;
-            let incorrect = 0;
-            let skipped = 0;
-            
+            let correct = 0, incorrect = 0, skipped = 0;
             for (let i = 0; i < 30; i++) {
-                if (!isAnswered[i]) {
-                    skipped++;
-                } else if (userAnswers[i] === shuffledQuestions[i].correctIndex) {
-                    correct++;
-                } else {
-                    incorrect++;
-                }
+                if (!isAnswered[i]) skipped++;
+                else if (userAnswers[i] === shuffledQuestions[i].correctIndex) correct++;
+                else incorrect++;
             }
-            
             const percentage = Math.round((correct / 30) * 100);
             return { correct, incorrect, skipped, percentage };
         }
@@ -702,7 +654,6 @@
             resultsScreen.classList.remove("hidden");
             
             const stats = calculateResults();
-            
             document.getElementById("score").textContent = stats.correct;
             document.getElementById("percentage").textContent = stats.percentage;
             document.getElementById("correct-count").textContent = stats.correct;
@@ -710,24 +661,12 @@
             document.getElementById("skipped-count").textContent = stats.skipped;
             
             const trophyEl = document.getElementById("trophy");
-            if (stats.percentage >= 80) {
-                trophyEl.innerHTML = "🏆";
-            } else if (stats.percentage >= 60) {
-                trophyEl.innerHTML = "🎉";
-            } else {
-                trophyEl.innerHTML = "🌐";
-            }
+            trophyEl.innerHTML = stats.percentage >= 80 ? "🏆" : stats.percentage >= 60 ? "🎉" : "🌐";
             
-            let insight = "";
-            if (stats.percentage >= 90) {
-                insight = "Outstanding performance! You have completely mastered network infrastructure, architecture, types, protocols, OSI model, TCP/IP, and their comparisons.";
-            } else if (stats.percentage >= 75) {
-                insight = "Excellent work! Strong understanding of client-server vs P2P, LAN/MAN/WAN, and the 7 layers of OSI.";
-            } else if (stats.percentage >= 60) {
-                insight = "Good job! Solid grasp of the fundamentals. Review PDU names, layer functions, and critiques of both models.";
-            } else {
-                insight = "Keep learning! Focus on the 7 OSI layers and how TCP/IP maps to them.";
-            }
+            let insight = stats.percentage >= 90 ? "Outstanding! You mastered network definitions, applications, architectures, types, protocols, OSI, TCP/IP, and their critiques." :
+                          stats.percentage >= 75 ? "Excellent! Strong grasp of client-server vs P2P, LAN/MAN/WAN, and model comparisons." :
+                          stats.percentage >= 60 ? "Good job! Review PDU names, layer functions, and de facto vs de jure standards." :
+                          "Keep learning! Focus on OSI layers and TCP/IP practical differences.";
             document.getElementById("insight-text").innerHTML = insight;
         }
 
@@ -750,18 +689,13 @@
                                 <span class="font-mono text-xs bg-zinc-800 px-3 py-1 rounded-2xl">${i+1}</span>
                                 <p class="font-medium text-white leading-tight">${q.question}</p>
                             </div>
-                            
                             <div class="mt-6 grid grid-cols-1 gap-4">
                                 ${q.options.map((opt, idx) => {
                                     let statusHTML = "";
                                     if (answered && idx === userIdx) {
-                                        statusHTML = isCorrect 
-                                            ? `<span class="text-emerald-400 text-xs font-bold">YOUR ANSWER ✓</span>` 
-                                            : `<span class="text-red-400 text-xs font-bold">YOUR ANSWER ✕</span>`;
+                                        statusHTML = isCorrect ? `<span class="text-emerald-400 text-xs font-bold">YOUR ANSWER ✓</span>` : `<span class="text-red-400 text-xs font-bold">YOUR ANSWER ✕</span>`;
                                     }
-                                    if (idx === q.correctIndex) {
-                                        statusHTML += ` <span class="text-emerald-400 text-xs font-bold">CORRECT</span>`;
-                                    }
+                                    if (idx === q.correctIndex) statusHTML += ` <span class="text-emerald-400 text-xs font-bold">CORRECT</span>`;
                                     return `
                                         <div class="flex justify-between items-center ${idx === q.correctIndex ? 'text-emerald-400' : 'text-zinc-300'}">
                                             <span>${String.fromCharCode(65 + idx)}. ${opt}</span>
@@ -775,7 +709,6 @@
                 `;
                 list.appendChild(div);
             });
-            
             modal.classList.remove("hidden");
             modal.classList.add("flex");
         }
@@ -789,7 +722,6 @@
         function shareResults() {
             const stats = calculateResults();
             const text = `🌐 I just scored ${stats.percentage}% on Quizzy Pro • Unit 1: Introduction to Computer Networks!\n\n✅ Correct: ${stats.correct}\n❌ Incorrect: ${stats.incorrect}\n⏭️ Skipped: ${stats.skipped}\n\nMastered OSI, TCP/IP, LAN/WAN & protocols? Try Quizzy Pro!`;
-            
             navigator.clipboard.writeText(text).then(() => {
                 const btn = event.currentTarget;
                 const origHTML = btn.innerHTML;
@@ -802,20 +734,15 @@
             currentIndex = 0;
             userAnswers = new Array(30).fill(null);
             isAnswered = new Array(30).fill(false);
-            
             prepareShuffledQuestions();
-            
             document.getElementById("quiz-screen").classList.remove("hidden");
             document.getElementById("results-screen").classList.add("hidden");
-            
             renderQuestion();
-            
             console.log("%cQuizzy Pro • Unit 1: Introduction to Computer Networks restarted with fresh random order!", "color:#67e8f9; font-weight:600");
         }
 
         function handleKeyboard(e) {
             if (!document.getElementById("results-screen").classList.contains("hidden")) return;
-            
             if (e.key === "ArrowRight") nextQuestion();
             if (e.key === "ArrowLeft") prevQuestion();
             if (e.key >= "1" && e.key <= "4" && !isAnswered[currentIndex]) {
@@ -828,16 +755,12 @@
             userAnswers = new Array(30).fill(null);
             isAnswered = new Array(30).fill(false);
             currentIndex = 0;
-            
             renderQuestion();
             document.addEventListener("keydown", handleKeyboard);
-            
-            console.log("%c✅ Quizzy Pro • Unit 1: Introduction to Computer Networks loaded successfully! (30 MCQs from official PDF)", "color:#67e8f9; font-family:monospace; font-size:13px");
+            console.log("%c✅ Quizzy Pro • Unit 1: Introduction to Computer Networks loaded successfully! (30 tricky MCQs from official PDF)", "color:#67e8f9; font-family:monospace; font-size:13px");
         }
 
-        window.onload = function() {
-            startQuiz();
-        };
+        window.onload = startQuiz;
     </script>
 </body>
 </html>
