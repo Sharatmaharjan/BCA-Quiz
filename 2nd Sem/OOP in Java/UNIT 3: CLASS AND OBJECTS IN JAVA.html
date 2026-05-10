@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzy Pro • Unit 3: Class and Objects in Java (30 MCQs)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap');
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .title-font { font-family: 'Poppins', sans-serif; }
+        .option-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .option-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgb(16 185 129 / 0.3); }
+        .option-btn.selected-correct { background-color: #10b981; color: white; border-color: #10b981; }
+        .option-btn.selected-wrong { background-color: #ef4444; color: white; border-color: #ef4444; }
+        .option-btn.correct { background-color: #10b981; color: white; border-color: #10b981; }
+        .progress-bar { transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .modal { animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .question-card { animation: fadeSlide 0.4s ease forwards; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+    <div class="max-w-3xl mx-auto">
+        <header class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-2xl">
+            <div class="px-6 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-x-4">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center text-4xl shadow-inner">🏗️</div>
+                    <div>
+                        <h1 class="title-font text-3xl font-semibold tracking-tighter">Quizzy Pro</h1>
+                        <p class="text-emerald-100 text-sm font-medium -mt-1">Unit 3: Class and Objects in Java (30 MCQs)</p>
+                    </div>
+                </div>
+                <div onclick="restartQuiz()" class="flex items-center gap-x-2 bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-3xl text-sm font-semibold cursor-pointer">
+                    <i class="fas fa-redo"></i><span>Restart</span>
+                </div>
+            </div>
+            <div class="h-2 bg-black/30 relative">
+                <div id="progress-bar" class="progress-bar h-2 bg-white rounded-r-full w-0"></div>
+            </div>
+        </header>
+
+        <div id="quiz-screen" class="p-6">
+            <div class="flex justify-center mb-8">
+                <div class="px-5 py-1.5 bg-zinc-900 rounded-3xl text-sm font-mono font-medium text-emerald-400" id="question-counter">1 / 30</div>
+            </div>
+            <div id="question-card" class="question-card bg-zinc-900 rounded-3xl p-8 shadow-2xl border border-zinc-800">
+                <p id="question-text" class="text-2xl leading-tight font-medium text-white"></p>
+                <div id="options-container" class="mt-10 space-y-4"></div>
+            </div>
+            <div class="flex gap-4 mt-10">
+                <button onclick="prevQuestion()" id="btn-prev" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-white font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3">
+                    <i class="fas fa-chevron-left"></i><span>Previous</span>
+                </button>
+                <button onclick="nextQuestion()" id="btn-next" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 font-semibold py-5 rounded-3xl flex items-center justify-center gap-x-3">
+                    <span id="next-text">Next</span><i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="results-screen" class="hidden p-6">
+            <div class="bg-zinc-900 rounded-3xl p-10 text-center">
+                <div id="trophy" class="mx-auto w-32 h-32 flex items-center justify-center text-8xl mb-6"></div>
+                <h2 class="text-6xl font-bold text-white mb-1" id="score">92</h2>
+                <p class="text-emerald-400 text-2xl font-semibold">Score • <span id="percentage">92</span>%</p>
+                <div class="grid grid-cols-3 gap-6 mt-12">
+                    <div class="bg-zinc-800 rounded-3xl p-6"><div class="text-emerald-400"><i class="fas fa-check-circle text-3xl"></i></div><div id="correct-count" class="text-5xl font-bold mt-4 text-white">28</div><div class="text-zinc-400 text-sm">CORRECT</div></div>
+                    <div class="bg-zinc-800 rounded-3xl p-6"><div class="text-red-400"><i class="fas fa-times-circle text-3xl"></i></div><div id="incorrect-count" class="text-5xl font-bold mt-4 text-white">1</div><div class="text-zinc-400 text-sm">INCORRECT</div></div>
+                    <div class="bg-zinc-800 rounded-3xl p-6"><div class="text-amber-400"><i class="fas fa-forward text-3xl"></i></div><div id="skipped-count" class="text-5xl font-bold mt-4 text-white">1</div><div class="text-zinc-400 text-sm">SKIPPED</div></div>
+                </div>
+                <div class="mt-10 bg-zinc-800/70 rounded-3xl p-8 text-left">
+                    <p id="insight-text" class="text-zinc-300 leading-relaxed text-lg"></p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 mt-12">
+                    <button onclick="showReviewModal()" class="flex-1 py-6 bg-white text-zinc-900 rounded-3xl font-semibold flex items-center justify-center gap-x-3">REVIEW ALL ANSWERS</button>
+                    <button onclick="shareResults()" class="flex-1 py-6 bg-zinc-800 hover:bg-zinc-700 rounded-3xl font-semibold flex items-center justify-center gap-x-3">SHARE RESULT</button>
+                </div>
+                <button onclick="restartQuiz()" class="mt-6 w-full py-5 text-emerald-400 font-medium flex items-center justify-center gap-x-2">Restart Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REVIEW MODAL -->
+    <div id="review-modal" onclick="if(event.target.id==='review-modal')hideReviewModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div onclick="event.stopImmediatePropagation()" class="modal bg-zinc-900 w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col">
+            <div class="px-8 py-6 border-b border-zinc-700 flex items-center justify-between">
+                <div class="font-semibold text-xl">Review All Answers</div>
+                <button onclick="hideReviewModal()" class="w-9 h-9 flex items-center justify-center text-3xl text-zinc-400 hover:text-white">×</button>
+            </div>
+            <div id="review-list" class="flex-1 overflow-auto p-6 space-y-8"></div>
+            <div class="p-6 border-t border-zinc-700">
+                <button onclick="hideReviewModal()" class="w-full py-5 bg-emerald-500 hover:bg-emerald-400 rounded-3xl text-white font-semibold">Close Review</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const originalQuestions = [
+            {question:"A class in Java is best described as",options:["A runtime instance","A blueprint or template for creating objects","A collection of only methods","A variable declaration"],correctAnswer:"A blueprint or template for creating objects"},
+            {question:"The keyword used to create an object is",options:["class","new","object","instance"],correctAnswer:"new"},
+            {question:"Which of the following is true about constructors?",options:["They have return type","They must be named differently from class","They are called automatically when object is created","They can be final"],correctAnswer:"They are called automatically when object is created"},
+            {question:"If no constructor is defined in a class, Java provides",options:["No constructor","A default no-argument constructor","A parameterized constructor","A copy constructor"],correctAnswer:"A default no-argument constructor"},
+            {question:"The 'this' keyword is used to",options:["Refer to the current object","Call static methods","Declare variables","Import packages"],correctAnswer:"Refer to the current object"},
+            {question:"A static method can access",options:["Only static members directly","Both static and instance members","Only instance members","None"],correctAnswer:"Only static members directly"},
+            {question:"Encapsulation is achieved by",options:["Making all fields public","Making fields private and providing public getters/setters","Using only static methods","Using abstract classes"],correctAnswer:"Making fields private and providing public getters/setters"},
+            {question:"Abstraction means",options:["Hiding data","Hiding implementation details and showing only functionality","Making all methods private","Using global variables"],correctAnswer:"Hiding implementation details and showing only functionality"},
+            {question:"A copy constructor is used to",options:["Create a new object with default values","Create a new object by copying values from existing object","Initialize static variables","Call parent class constructor"],correctAnswer:"Create a new object by copying values from existing object"},
+            {question:"Java uses which mechanism for passing arguments to methods?",options:["Pass by reference","Pass by value","Pass by pointer","Pass by address"],correctAnswer:"Pass by value"},
+            {question:"When an object reference is passed to a method, the method can",options:["Change the reference itself","Modify the object's state","Both","Neither"],correctAnswer:"Modify the object's state"},
+            {question:"Recursion requires",options:["Only base case","Base case and recursive call","Only recursive call","No condition"],correctAnswer:"Base case and recursive call"},
+            {question:"A static nested class",options:["Requires outer class object to instantiate","Can be instantiated without outer class object","Cannot access static members","Is always private"],correctAnswer:"Can be instantiated without outer class object"},
+            {question:"Varargs parameter in Java is declared using",options:["...","[]","{}","var"],correctAnswer:"..."},
+            {question:"A package statement must be",options:["Last line in file","First non-comment line","After import statements","Anywhere"],correctAnswer:"First non-comment line"},
+            {question:"Which access modifier allows access within the same package only?",options:["public","protected","private","default (no modifier)"],correctAnswer:"default (no modifier)"},
+            {question:"The main method is static because",options:["It belongs to class not object","JVM calls it without creating object","Both","None"],correctAnswer:"Both"},
+            {question:"Which keyword is used to refer to the current instance of a class?",options:["super","this","self","current"],correctAnswer:"this"},
+            {question:"Constructor chaining using this() must be",options:["Last statement","First statement","Anywhere","Not allowed"],correctAnswer:"First statement"},
+            {question:"String objects are",options:["Mutable","Immutable","Both","None"],correctAnswer:"Immutable"},
+            {question:"The finalize() method is called by",options:["Programmer","JVM before garbage collection","Compiler","JVM after garbage collection"],correctAnswer:"JVM before garbage collection"},
+            {question:"Anonymous inner class is used for",options:["Creating named classes","One-time implementation of interface/abstract class","Static members","Packages"],correctAnswer:"One-time implementation of interface/abstract class"},
+            {question:"A class can have",options:["Only one constructor","Multiple constructors (overloading)","Only parameterized constructors","No constructors"],correctAnswer:"Multiple constructors (overloading)"},
+            {question:"Static block is executed",options:["Every time object is created","Once when class is loaded","When method is called","Never"],correctAnswer:"Once when class is loaded"},
+            {question:"Which of the following is not a type of inner class?",options:["Static nested","Local","Anonymous","Global"],correctAnswer:"Global"},
+            {question:"The dot operator (.) is used to",options:["Declare variables","Access members of object/class","Create objects","Import packages"],correctAnswer:"Access members of object/class"},
+            {question:"Default constructor provided by Java sets fields to",options:["Random values","Default values (0, null, false)","User input","Garbage values"],correctAnswer:"Default values (0, null, false)"},
+            {question:"Which method is used to convert StringBuffer to String?",options:["toString()","convert()","getString()","valueOf()"],correctAnswer:"toString()"},
+            {question:"In Java, all classes implicitly inherit from",options:["Object","System","Main","Class"],correctAnswer:"Object"},
+            {question:"A method with variable number of arguments is called",options:["Overloaded","Varargs","Polymorphic","Recursive"],correctAnswer:"Varargs"}
+        ];
+
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = [];
+        let isAnswered = [];
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function prepareShuffledQuestions() {
+            shuffledQuestions = originalQuestions.map(q => {
+                const shuffledOpts = shuffleArray(q.options);
+                const correctIndex = shuffledOpts.indexOf(q.correctAnswer);
+                return { question: q.question, options: shuffledOpts, correctIndex };
+            });
+        }
+
+        function renderQuestion() {
+            const q = shuffledQuestions[currentIndex];
+            document.getElementById("question-counter").textContent = `${currentIndex + 1} / 30`;
+            document.getElementById("question-text").textContent = q.question;
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+            const labels = ["A", "B", "C", "D"];
+            q.options.forEach((option, idx) => {
+                const btn = document.createElement("button");
+                btn.className = `option-btn w-full text-left px-7 py-6 rounded-3xl border-2 border-zinc-700 bg-zinc-800 hover:border-emerald-400 transition-all flex items-start gap-4 group`;
+                btn.innerHTML = `
+                    <span class="w-8 h-8 flex-shrink-0 rounded-2xl bg-zinc-700 text-emerald-400 font-bold flex items-center justify-center text-lg transition-colors group-hover:bg-emerald-400 group-hover:text-white">${labels[idx]}</span>
+                    <span class="text-lg leading-tight">${option}</span>
+                `;
+                btn.onclick = () => selectOption(idx);
+                container.appendChild(btn);
+            });
+            updateProgress();
+            updateNavigation();
+            if (isAnswered[currentIndex]) showFeedback();
+        }
+
+        function selectOption(selectedIdx) {
+            if (isAnswered[currentIndex]) return;
+            isAnswered[currentIndex] = true;
+            userAnswers[currentIndex] = selectedIdx;
+            showFeedback();
+            updateNavigation();
+        }
+
+        function showFeedback() {
+            const q = shuffledQuestions[currentIndex];
+            const container = document.getElementById("options-container");
+            const buttons = container.children;
+            const userChoice = userAnswers[currentIndex];
+            for (let i = 0; i < buttons.length; i++) {
+                const btn = buttons[i];
+                if (i === q.correctIndex) {
+                    btn.classList.add("correct");
+                    btn.innerHTML += `<span class="ml-auto text-white text-2xl">✓</span>`;
+                }
+                if (i === userChoice) {
+                    if (userChoice === q.correctIndex) btn.classList.add("selected-correct");
+                    else {
+                        btn.classList.add("selected-wrong");
+                        btn.innerHTML += `<span class="ml-auto text-white text-2xl">✕</span>`;
+                    }
+                }
+                btn.onclick = null;
+                btn.style.cursor = "default";
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / 30) * 100;
+            document.getElementById("progress-bar").style.width = `${progress}%`;
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById("btn-prev");
+            const nextText = document.getElementById("next-text");
+            prevBtn.disabled = currentIndex === 0;
+            prevBtn.style.opacity = currentIndex === 0 ? "0.4" : "1";
+            nextText.textContent = currentIndex === 29 ? "Finish Quiz" : "Next";
+        }
+
+        function nextQuestion() {
+            if (currentIndex < 29) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function calculateResults() {
+            let correct = 0, incorrect = 0, skipped = 0;
+            for (let i = 0; i < 30; i++) {
+                if (!isAnswered[i]) skipped++;
+                else if (userAnswers[i] === shuffledQuestions[i].correctIndex) correct++;
+                else incorrect++;
+            }
+            const percentage = Math.round((correct / 30) * 100);
+            return { correct, incorrect, skipped, percentage };
+        }
+
+        function showResults() {
+            document.getElementById("quiz-screen").classList.add("hidden");
+            const resultsScreen = document.getElementById("results-screen");
+            resultsScreen.classList.remove("hidden");
+            const stats = calculateResults();
+            document.getElementById("score").textContent = stats.correct;
+            document.getElementById("percentage").textContent = stats.percentage;
+            document.getElementById("correct-count").textContent = stats.correct;
+            document.getElementById("incorrect-count").textContent = stats.incorrect;
+            document.getElementById("skipped-count").textContent = stats.skipped;
+
+            const trophyEl = document.getElementById("trophy");
+            trophyEl.innerHTML = stats.percentage >= 80 ? "🏆" : stats.percentage >= 60 ? "🎉" : "🏗️";
+
+            let insight = stats.percentage >= 90 ? "Outstanding! You have mastered Class, Objects, and OOP concepts." :
+                          stats.percentage >= 75 ? "Excellent work! Strong understanding of constructors, this, and static members." :
+                          stats.percentage >= 60 ? "Good job! Review encapsulation, inheritance concepts, and recursion." :
+                          "Keep practicing! Focus on constructors, this keyword, and packages.";
+            document.getElementById("insight-text").innerHTML = insight;
+        }
+
+        function showReviewModal() {
+            const modal = document.getElementById("review-modal");
+            const list = document.getElementById("review-list");
+            list.innerHTML = "";
+            shuffledQuestions.forEach((q, i) => {
+                const answered = isAnswered[i];
+                const userIdx = userAnswers[i];
+                const isCorrect = answered && (userIdx === q.correctIndex);
+                const div = document.createElement("div");
+                div.className = "border border-zinc-700 rounded-3xl p-6";
+                div.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-x-3">
+                                <span class="font-mono text-xs bg-zinc-800 px-3 py-1 rounded-2xl">${i+1}</span>
+                                <p class="font-medium text-white leading-tight">${q.question}</p>
+                            </div>
+                            <div class="mt-6 grid grid-cols-1 gap-4">
+                                ${q.options.map((opt, idx) => {
+                                    let statusHTML = "";
+                                    if (answered && idx === userIdx) {
+                                        statusHTML = isCorrect ? `<span class="text-emerald-400 text-xs font-bold">YOUR ANSWER ✓</span>` : `<span class="text-red-400 text-xs font-bold">YOUR ANSWER ✕</span>`;
+                                    }
+                                    if (idx === q.correctIndex) statusHTML += ` <span class="text-emerald-400 text-xs font-bold">CORRECT</span>`;
+                                    return `
+                                        <div class="flex justify-between items-center ${idx === q.correctIndex ? 'text-emerald-400' : 'text-zinc-300'}">
+                                            <span>${String.fromCharCode(65 + idx)}. ${opt}</span>
+                                            ${statusHTML}
+                                        </div>
+                                    `;
+                                }).join("")}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function hideReviewModal() {
+            const modal = document.getElementById("review-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function shareResults() {
+            const stats = calculateResults();
+            const text = `🏗️ I just scored ${stats.percentage}% on Quizzy Pro • Unit 3: Class and Objects in Java!`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Result copied to clipboard!");
+            });
+        }
+
+        function restartQuiz() {
+            currentIndex = 0;
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            prepareShuffledQuestions();
+            document.getElementById("quiz-screen").classList.remove("hidden");
+            document.getElementById("results-screen").classList.add("hidden");
+            renderQuestion();
+        }
+
+        function handleKeyboard(e) {
+            if (!document.getElementById("results-screen").classList.contains("hidden")) return;
+            if (e.key === "ArrowRight") nextQuestion();
+            if (e.key === "ArrowLeft") prevQuestion();
+            if (e.key >= "1" && e.key <= "4" && !isAnswered[currentIndex]) {
+                selectOption(parseInt(e.key) - 1);
+            }
+        }
+
+        function startQuiz() {
+            prepareShuffledQuestions();
+            userAnswers = new Array(30).fill(null);
+            isAnswered = new Array(30).fill(false);
+            currentIndex = 0;
+            renderQuestion();
+            document.addEventListener("keydown", handleKeyboard);
+            console.log("%c✅ Quizzy Pro • Unit 3: Class and Objects in Java loaded successfully!", "color:#10b981; font-family:monospace; font-size:13px");
+        }
+
+        window.onload = startQuiz;
+    </script>
+</body>
+</html>
